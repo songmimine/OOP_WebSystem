@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Dashboard | University Lab Equipment Lending Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="user_dashboard.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="user_dashboard.html" class="brand">
+      <span class="brand-logo">L</span>
+      <span class="brand-name">University Lab</span>
+      <span class="brand-sub">Equipment lending portal</span>
+    </a>
+
+    <nav class="nav" aria-label="Main navigation">
+      <a href="user_dashboard.html" class="nav-link active" aria-current="page">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="borrow_request.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2h-1"/><path d="M12 11v6M9 14h6"/></svg>
+        Borrow Request
+      </a>
+      <a href="inventory_catalog.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><circle cx="6.5" cy="16.5" r="3.5"/><circle cx="17.5" cy="16.5" r="3.5"/></svg>
+        Inventory Catalog
+      </a>
+      <a href="my_requests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="m4 6 1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M12 6.5h8M12 12.5h8M12 18.5h8"/></svg>
+        My Requests
+      </a>
+      <a href="return_equipment.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
+        Return Equipment
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">Student Prototype · October 2026</div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <span class="topbar-title">School Laboratory Equipment</span>
+
+      <div class="profile" id="profile">
+        <button class="profile-btn" id="profileBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-name">Katrina Mendoza</span>
+          <span class="avatar">KM</span>
+        </button>
+        <div class="profile-menu" id="profileMenu" role="menu">
+          <a href="my_requests.html" role="menuitem">My requests</a>
+          <a href="login.html" role="menuitem" class="logout">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="intro">
+        <p class="eyebrow">Student dashboard</p>
+        <h1>Good day, Katrina Mendoza</h1>
+        <p class="lead">Here is your laboratory borrowing overview for October 2026.</p>
+      </div>
+
+      <!-- STATS -->
+      <section class="stats" aria-label="Borrowing summary">
+        <a href="my_requests.html?status=approved" class="stat-card">
+          <strong class="stat-number" data-count="2">2</strong>
+          <span>Active borrowings</span>
+        </a>
+        <a href="my_requests.html?status=pending" class="stat-card">
+          <strong class="stat-number" data-count="1">1</strong>
+          <span>Pending requests</span>
+        </a>
+        <a href="return_equipment.html" class="stat-card">
+          <strong class="stat-number" data-count="2">2</strong>
+          <span>Upcoming returns</span>
+        </a>
+      </section>
+
+      <div class="dash-grid">
+        <!-- CALENDAR -->
+        <section class="card calendar" aria-labelledby="cal-title">
+          <div class="card-head">
+            <h2 id="cal-title">October 2026</h2>
+            <span class="year">2026</span>
+          </div>
+
+          <div class="weekdays" aria-hidden="true">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div class="days" id="calendarGrid" role="grid" aria-label="October 2026 calendar"></div>
+
+          <div class="legend">
+            <span><i class="dot dot-borrow"></i>Borrow dates</span>
+            <span><i class="dot dot-return"></i>Return dates</span>
+          </div>
+        </section>
+
+        <div class="side-col">
+          <!-- BORROWED -->
+          <section class="card" aria-labelledby="borrowed-title">
+            <div class="card-head">
+              <h2 id="borrowed-title">Borrowed Equipment</h2>
+              <a href="return_equipment.html" class="text-link">View returns <span class="arrow">→</span></a>
+            </div>
+
+            <ul class="item-list">
+              <li>
+                <a href="return_equipment.html?item=digital-multimeter" class="item">
+                  <span class="item-icon"><svg viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 8-10h-6z"/></svg></span>
+                  <span class="item-text"><strong>Digital Multimeter</strong><small>Qty 2 · Due 24 Oct 2026</small></span>
+                  <span class="pill">Borrowed</span>
+                </a>
+              </li>
+              <li>
+                <a href="return_equipment.html?item=vernier-caliper" class="item">
+                  <span class="item-icon"><svg viewBox="0 0 24 24"><path d="m14.5 5.5 4 4-9 9-4-4z"/><path d="m8 12 1.5 1.5M10.5 9.5 12 11M13 7l1.5 1.5"/></svg></span>
+                  <span class="item-text"><strong>Vernier Caliper</strong><small>Qty 1 · Due 24 Oct 2026</small></span>
+                  <span class="pill">Borrowed</span>
+                </a>
+              </li>
+              <li>
+                <a href="return_equipment.html?item=compound-microscope" class="item">
+                  <span class="item-icon"><svg viewBox="0 0 24 24"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+                  <span class="item-text"><strong>Compound Microscope</strong><small>Qty 1 · Due 22 Oct 2026</small></span>
+                  <span class="pill">Borrowed</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <!-- DEADLINES -->
+          <section class="card" aria-labelledby="deadline-title">
+            <div class="card-head">
+              <h2 id="deadline-title">Upcoming Return Deadlines</h2>
+            </div>
+
+            <ul class="item-list">
+              <li>
+                <a href="return_equipment.html?due=2026-10-24" class="deadline">
+                  <span class="item-text"><strong>Digital Multimeter, Vernier Caliper</strong><small>Return by 24 Oct 2026</small></span>
+                  <span class="pill">Due soon</span>
+                </a>
+              </li>
+              <li>
+                <a href="return_equipment.html?due=2026-10-22" class="deadline">
+                  <span class="item-text"><strong>Compound Microscope</strong><small>Return by 22 Oct 2026</small></span>
+                  <span class="pill">Due soon</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="tip" id="tip" role="tooltip"></div>
+  <script src="user_dashboard.js"></script>
+</body>
+</html>

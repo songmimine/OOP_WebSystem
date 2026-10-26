@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard | University Labs Equipment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_dashboard.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="admin_dashboard.html" class="brand">
+      <span class="brand-logo">L</span>
+      <span class="brand-name">University Labs</span>
+      <span class="brand-sub">Equipment System</span>
+    </a>
+
+    <nav class="nav" aria-label="Main navigation">
+      <a href="admin_dashboard.html" class="nav-link active" aria-current="page">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="inventory_records.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><circle cx="6.5" cy="16.5" r="3.5"/><circle cx="17.5" cy="16.5" r="3.5"/></svg>
+        Inventory Records
+      </a>
+      <a href="borrow_requests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2h-1"/><path d="M8.5 13h7M8.5 17h5"/></svg>
+        Borrow Requests
+      </a>
+      <a href="return_confirmation.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
+        Return Confirmation
+      </a>
+      <a href="reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>
+        Reports
+      </a>
+      <a href="settings.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 8h9M16 8h5M3 16h4M11 16h10"/><circle cx="14" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">Admin Workspace · 2026</div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <span class="topbar-title">School Laboratory Equipment</span>
+      <span class="topbar-role">Administrator</span>
+
+      <div class="profile" id="profile">
+        <button class="avatar" id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">AR</button>
+        <div class="profile-menu" id="profileMenu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="login.html" role="menuitem" class="logout">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <p class="eyebrow">Admin overview / October 2026</p>
+      <h1>Good day, Administrator.</h1>
+      <p class="lead">Here is what needs your attention across the laboratory.</p>
+
+      <!-- STAT CARDS -->
+      <section class="stats" aria-label="Request summary">
+        <a href="borrow_requests.html?status=pending" class="stat-card">
+          <div class="stat-head">
+            <span>Pending Requests</span>
+            <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+          </div>
+          <strong class="stat-number" data-count="3">3</strong>
+          <small>Awaiting review</small>
+        </a>
+
+        <a href="borrow_requests.html?status=approved" class="stat-card">
+          <div class="stat-head">
+            <span>Approved Requests</span>
+            <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-4.9"/></svg></span>
+          </div>
+          <strong class="stat-number" data-count="2">2</strong>
+          <small>Active borrowings</small>
+        </a>
+
+        <a href="borrow_requests.html?status=rejected" class="stat-card">
+          <div class="stat-head">
+            <span>Rejected Requests</span>
+            <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m9.2 9.2 5.6 5.6M14.8 9.2l-5.6 5.6"/></svg></span>
+          </div>
+          <strong class="stat-number" data-count="1">1</strong>
+          <small>Not approved</small>
+        </a>
+
+        <a href="borrow_requests.html" class="stat-card">
+          <div class="stat-head">
+            <span>Total Borrowing Requests</span>
+            <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2h-1"/><path d="M8.5 13h7M8.5 17h5"/></svg></span>
+          </div>
+          <strong class="stat-number" data-count="7">7</strong>
+          <small>October 2026</small>
+        </a>
+      </section>
+
+      <!-- PENDING TABLE -->
+      <section class="panel" aria-labelledby="pending-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="pending-title">Pending requests for approval</h2>
+            <p>Review the latest student borrowing requests.</p>
+          </div>
+          <a href="borrow_requests.html" class="btn-outline">View all requests</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Student</th>
+                <th>Equipment</th>
+                <th>Borrow Date</th>
+                <th>Return Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="req-id">BR-2026-104</td>
+                <td><span class="student">Ana Reyes</span><span class="course">BS Electronics Engineering</span></td>
+                <td>Digital Multimeter ×2, Oscilloscope ×1</td>
+                <td>21 Oct 2026</td>
+                <td>25 Oct 2026</td>
+                <td><span class="badge">Pending</span></td>
+                <td><a href="review_request.html?id=BR-2026-104" class="review-link">Review <span class="arrow">→</span></a></td>
+              </tr>
+              <tr>
+                <td class="req-id">BR-2026-103</td>
+                <td><span class="student">Miguel Santos</span><span class="course">BS Biology</span></td>
+                <td>Compound Microscope ×2</td>
+                <td>22 Oct 2026</td>
+                <td>26 Oct 2026</td>
+                <td><span class="badge">Pending</span></td>
+                <td><a href="review_request.html?id=BR-2026-103" class="review-link">Review <span class="arrow">→</span></a></td>
+              </tr>
+              <tr>
+                <td class="req-id">BR-2026-102</td>
+                <td><span class="student">Katrina Mendoza</span><span class="course">BS Mechanical Engineering</span></td>
+                <td>Vernier Caliper ×2, Triple Beam Balance ×1</td>
+                <td>20 Oct 2026</td>
+                <td>24 Oct 2026</td>
+                <td><span class="badge">Pending</span></td>
+                <td><a href="review_request.html?id=BR-2026-102" class="review-link">Review <span class="arrow">→</span></a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <script src="admin_dashboard.js"></script>
+</body>
+</html>
