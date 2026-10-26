@@ -24,18 +24,18 @@
 
     <section class="login-card">
       <img class="card-logo" src="../assets/lpu-logo-black.png" alt="LPU Cavite">
-      <p class="card-subtitle">Log in with your LPU network account.</p>
+      <p class="card-subtitle">Log in with your User ID and password.</p>
 
       <form id="loginForm" novalidate>
         <div class="form-group">
-          <label for="email">LPU email</label>
+          <label for="email">User ID</label>
           <div class="input-wrap">
             <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="3" y="5" width="18" height="14" rx="2.5"/>
               <polyline points="3.5,7 12,13 20.5,7"/>
             </svg>
-            <input type="email" id="email" name="email" placeholder="2025-2-00xxx@lpunetwork.edu.ph"
-                   autocomplete="username" required>
+            <input type="text" id="email" name="email" placeholder="User ID (e.g. 2025-2-00001)"
+                   autocomplete="username" autocapitalize="characters" spellcheck="false" required>
           </div>
         </div>
 
@@ -174,31 +174,46 @@
     };
 
     /* ------------------------------------------------------------
-       EMAIL FORMATS
-       admin: 2025-00001@lpunetwork.edu.ph    -> admin dashboard
-       user:  2025-2-00001@lpunetwork.edu.ph  -> user dashboard
+       ACCOUNTS
+       Passwords are stored as SHA-256 hashes, never as plain text.
+       Default password for both accounts: lab123
+       To make a new hash:  printf 'newpass' | sha256sum
+       NOTE: this is front-end only. Anyone can read this file, so move
+       the check to a server/database before real use.
        ------------------------------------------------------------ */
-    const ADMIN_EMAIL = /^\d{4}-\d{5}@lpunetwork\.edu\.ph$/;
-    const USER_EMAIL  = /^\d{4}-\d-\d{5}@lpunetwork\.edu\.ph$/;
+    const DEFAULT_HASH = "3705b578e8fcb1b82a94ad917881ec248bbd4111645e91aed3c19af12d82116f"; // "lab123"
 
-    function roleFromEmail(email) {
-      if (ADMIN_EMAIL.test(email)) return "admin";
-      if (USER_EMAIL.test(email))  return "user";
-      return null;
+    const ACCOUNTS = {
+      "LAB-00001":    { role: "admin", name: "Administrator", passwordHash: DEFAULT_HASH },
+      "2025-2-00001": { role: "user",  name: "Student",       passwordHash: DEFAULT_HASH }
+    };
+
+    /* Accepts "LAB-00001" or "LAB-00001@lpunetwork.edu.ph", any letter case */
+    function normalizeId(input) {
+      return input.trim().toUpperCase().replace(/@LPUNETWORK\.EDU\.PH$/, "");
+    }
+
+    async function sha256(text) {
+      const bytes = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest))
+        .map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
     /* ------------------------------------------------------------
-       AUTHENTICATION HOOK
-       Replace the body of this function with your real database/API
-       call (e.g. fetch("/api/login", { method: "POST", ... })).
-       It must resolve to: { success: true, role: "user" | "admin" }
-       or:                  { success: false, message: "..." }
+       AUTHENTICATION
+       Resolves to { success: true, id, role, name } or
+                   { success: false, message }.
+       Replace the body with a fetch("/api/login") call later.
        ------------------------------------------------------------ */
-    async function authenticate(email, password) {
-      // TEMPORARY placeholder so the page can be tested before the
-      // database exists: the role is taken from the email format only
-      // and the password is NOT checked. Replace with a real server check.
-      return { success: true, role: roleFromEmail(email) };
+    async function authenticate(id, password) {
+      const account = ACCOUNTS[id];
+      const hash = await sha256(password);
+      // Same message for unknown ID and wrong password (doesn't reveal which IDs exist)
+      if (!account || account.passwordHash !== hash) {
+        return { success: false, message: "Incorrect User ID or password." };
+      }
+      return { success: true, id, role: account.role, name: account.name };
     }
 
     /* ---------------- UI logic ---------------- */
@@ -227,15 +242,11 @@
       e.preventDefault();
       showMessage("");
 
-      const email = emailEl.value.trim().toLowerCase();
+      const id = normalizeId(emailEl.value);
       const password = passEl.value;
 
-      if (!email || !password) {
-        showMessage("Please enter your LPU email and password.");
-        return;
-      }
-      if (!roleFromEmail(email)) {
-        showMessage("Use your LPU email, e.g. 2025-2-00001@lpunetwork.edu.ph.");
+      if (!id || !password) {
+        showMessage("Please enter your User ID and password.");
         return;
       }
 
@@ -243,15 +254,17 @@
       loginBtn.classList.add("loading");
 
       try {
-        const result = await authenticate(email, password);
+        const result = await authenticate(id, password);
 
         if (!result.success) {
-          showMessage(result.message || "Incorrect email or password.");
+          showMessage(result.message || "Incorrect User ID or password.");
+          passEl.value = "";
+          passEl.focus();
           return;
         }
 
         const storage = rememberEl.checked ? localStorage : sessionStorage;
-        storage.setItem("lablink_session", JSON.stringify({ email, role: result.role }));
+        storage.setItem("lablink_session", JSON.stringify({ id: result.id, name: result.name, role: result.role }));
 
         const destination = DASHBOARDS[result.role];
         if (!destination) {

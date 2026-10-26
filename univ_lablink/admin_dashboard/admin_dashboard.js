@@ -1,3 +1,23 @@
+/* ---- Access guard: only a logged-in admin may view this page ---- */
+(function () {
+  const logoutLink = document.querySelector(".logout");
+  const loginUrl = logoutLink ? logoutLink.getAttribute("href") : "login.html";
+  let session = null;
+  try {
+    session = JSON.parse(localStorage.getItem("lablink_session") || sessionStorage.getItem("lablink_session"));
+  } catch (e) {}
+  if (!session || session.role !== "admin") {
+    window.location.replace(loginUrl);
+    return;
+  }
+  if (logoutLink) {
+    logoutLink.addEventListener("click", () => {
+      localStorage.removeItem("lablink_session");
+      sessionStorage.removeItem("lablink_session");
+    });
+  }
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
