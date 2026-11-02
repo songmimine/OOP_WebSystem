@@ -222,6 +222,22 @@ img {
   cursor: pointer;
 }
 
+/* ---------- Error message ---------- */
+.login-error {
+  margin: -8px 0 16px;
+  padding: 10px 12px;
+  border: 1px solid #f1b8b8;
+  border-radius: 10px;
+  background: #fdeeee;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #b42323;
+}
+
+.login-error[hidden] {
+  display: none;
+}
+
 /* ---------- Button ---------- */
 .btn-login {
   display: flex;

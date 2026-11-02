@@ -23,20 +23,20 @@
   <main class="login-page">
     <section class="login-card" aria-labelledby="login-heading">
       <img class="login-card__logo" src="assets/lpu-logo-black.png" alt="LPU Cavite">
-      <h1 id="login-heading" class="login-card__subtitle">Log in with your LPU university account.</h1>
+      <h1 id="login-heading" class="login-card__subtitle">Log in with your LPU network account.</h1>
 
       <form class="login-form" action="#" method="post" novalidate>
 
         <!-- Email -->
         <div class="field">
-          <label class="field__label" for="email">LPU Email</label>
+          <label class="field__label" for="email">LPU email</label>
           <div class="field__control">
             <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="3" y="5" width="18" height="14" rx="2.5"/>
               <path d="M3.5 7.5l8.5 6 8.5-6"/>
             </svg>
             <input class="field__input" type="text" id="email" name="email"
-                   placeholder="Example: (2025-2-00xxx)"
+                   placeholder="2025-2-00xxx"
                    autocomplete="username" required>
           </div>
         </div>
@@ -57,6 +57,9 @@
                     aria-controls="password" aria-pressed="false">Show</button>
           </div>
         </div>
+
+        <!-- Error message (shown by login/login.js) -->
+        <p class="login-error" id="login-error" role="alert" hidden></p>
 
         <!-- Keep logged in -->
         <label class="checkbox">
@@ -86,7 +89,7 @@
           <span>Cavite Campus</span>
         </h2>
         <p class="footer-about__text">
-          Unofficial Laboratory &amp; Equipment Resource Management Portal of Lyceum of the
+          Official Laboratory &amp; Equipment Resource Management Portal of Lyceum of the
           Philippines University Cavite. Streamlining equipment reservation, borrowing, and
           inventory management for students and custodians.
         </p>
@@ -138,6 +141,8 @@
 
     </div>
   </footer>
+
+  <script src="login/login.js"></script>
 
   <script>
     // Show / hide password
