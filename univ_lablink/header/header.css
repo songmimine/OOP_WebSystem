@@ -13,6 +13,7 @@
   --msh-field: #eef1fa;
   --msh-hover: #e6e9ef; /* darker gray used for menu hover */
   --msh-red: #e0342b;
+  --msh-logout: #c0261c; /* Log Out text + icon (passes contrast on white and hover gray) */
   --msh-white: #ffffff;
 
   position: sticky;
@@ -314,7 +315,7 @@
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 236px;
+  width: 244px;
   background: var(--msh-white);
   border: 1px solid var(--msh-line);
   border-radius: 10px;
@@ -347,8 +348,8 @@
 }
 
 .main-system-header .msh-menu-user-icon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   flex: none;
   fill: var(--msh-navy);
 }
@@ -361,7 +362,7 @@
 }
 
 .main-system-header .msh-menu-user-name {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--msh-ink);
   white-space: nowrap;
@@ -370,7 +371,7 @@
 }
 
 .main-system-header .msh-menu-user-role {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--msh-muted);
 }
 
@@ -383,16 +384,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 8px;
+  padding: 10px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--msh-ink);
 }
 
 .main-system-header .msh-menu a .msh-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   color: var(--msh-navy);
 }
 
@@ -411,8 +412,14 @@
 }
 
 .main-system-header .msh-menu-footer a {
-  padding: 13px 22px;
+  padding: 12px 8px 12px 14px;
   border-radius: 0 0 9px 9px;
+}
+
+/* Log Out: red text and icon */
+.main-system-header .msh-menu-footer a,
+.main-system-header .msh-menu-footer a .msh-icon {
+  color: var(--msh-logout);
 }
 
 @keyframes msh-menu-in {
