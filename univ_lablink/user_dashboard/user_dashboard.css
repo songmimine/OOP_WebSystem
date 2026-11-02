@@ -681,8 +681,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px 12px 12px 16px;
-  background: #ffffff;
-  border-bottom: 1px solid var(--d-line);
+  background: var(--d-navy);
+  color: #ffffff;
 }
 
 .dash-notif-title {
@@ -690,7 +690,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: var(--d-navy);
+  color: #ffffff;
 }
 
 .dash-link-btn {
@@ -699,7 +699,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--d-focus);
+  color: #ffffff;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -707,11 +707,11 @@
 }
 
 .dash-link-btn:hover:not(:disabled) {
-  background: var(--d-hover);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .dash-link-btn:disabled {
-  color: var(--d-muted);
+  color: rgba(255, 255, 255, 0.65);
   cursor: default;
 }
 
@@ -724,12 +724,17 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--d-ink);
+  color: #ffffff;
   cursor: pointer;
 }
 
 .dash-close:hover {
-  background: var(--d-hover);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Keep the focus ring visible on the dark header */
+.dash-notif-head button:focus-visible {
+  outline-color: #ffffff;
 }
 
 .dash-notif-list {
