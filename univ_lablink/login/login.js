@@ -1,21 +1,16 @@
 // =====================================================
-// Login: separates admin and user accounts, then redirects
-// Paths are relative to univ_lablink/index.html (the page that loads this script)
+// Login: sends ID + password to the Flask backend (/api/login).
+// The server decides the role (admin or user) and returns where to go.
+// Path is relative to univ_lablink/index.html (the page that loads this script)
 // =====================================================
 (function () {
   "use strict";
-
-  var PASSWORD = "lab123"; // the only valid password for both roles
-
-  var ACCOUNTS = {
-    "LAB-00001":    { role: "admin", redirect: "admin_welcome/admin_welcome.html" },
-    "2025-2-00001": { role: "user",  redirect: "user_welcome/user_welcome.html" }
-  };
 
   var form     = document.querySelector(".login-form");
   var idInput  = document.getElementById("email");     // the User ID field
   var pwInput  = document.getElementById("password");
   var errorBox = document.getElementById("login-error");
+  var submitBtn = form.querySelector(".btn-login");
 
   function showError(message) {
     errorBox.textContent = message;
@@ -30,7 +25,7 @@
   form.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    var id = idInput.value.trim().toUpperCase(); // "lab-00001" also works
+    var id = idInput.value.trim();
     var password = pwInput.value;
 
     if (!id || !password) {
@@ -38,21 +33,45 @@
       return;
     }
 
-    var account = Object.prototype.hasOwnProperty.call(ACCOUNTS, id) ? ACCOUNTS[id] : null;
+    submitBtn.disabled = true;
 
-    // Unknown ID or wrong password: stay on the login page
-    if (!account || password !== PASSWORD) {
-      showError("Invalid User ID or password.");
-      pwInput.value = "";
-      pwInput.focus();
-      return;
-    }
+    fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id, password: password })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+      })
+      .then(function (result) {
+        if (!result.ok || !result.data.ok) {
+          showError(result.data.message || "Invalid User ID or password.");
+          pwInput.value = "";
+          pwInput.focus();
+          return;
+        }
 
-    clearError();
-    window.location.href = account.redirect; // admin -> admin welcome, user -> user welcome
+        // Keep what the existing dashboards read from localStorage
+        try {
+          localStorage.setItem("lablink_session", JSON.stringify({ role: result.data.role }));
+          localStorage.setItem("lablink_user", JSON.stringify({
+            name: result.data.name,
+            role: result.data.role === "admin" ? "Laboratory Staff" : "Student"
+          }));
+        } catch (e) { /* storage unavailable */ }
+
+        clearError();
+        window.location.href = result.data.redirect; // admin -> admin side, user -> user side
+      })
+      .catch(function () {
+        showError("Cannot reach the server. Make sure the Flask app is running.");
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+      });
   });
 
-  // Hide the error as soon as the person starts typing again
   idInput.addEventListener("input", clearError);
   pwInput.addEventListener("input", clearError);
 })();
+
