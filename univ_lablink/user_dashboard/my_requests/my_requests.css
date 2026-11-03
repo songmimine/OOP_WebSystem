@@ -1,0 +1,422 @@
+/* =====================================================
+   My Requests page
+   Scoped under .my-requests so it never leaks into the shared header
+   or other dashboard pages.
+   ===================================================== */
+
+:root {
+  --mr-page-bg: #f5f7fb;
+}
+
+body {
+  margin: 0;
+  background: var(--mr-page-bg);
+}
+
+.my-requests {
+  --mr-navy: #112b55;
+  --mr-navy-hover: #0b1f3f;
+  --mr-text: #1f2937;
+  --mr-muted: #6b7280;
+  --mr-border: #e2e6ee;
+  --mr-white: #ffffff;
+  --mr-grey-btn: #e5e8ee;
+  --mr-grey-btn-hover: #d8dce4;
+
+  /* status colors: background / text */
+  --mr-pending-bg: #fff4e5;   --mr-pending-fg: #e08600;
+  --mr-approved-bg: #edf7ed;  --mr-approved-fg: #2f8f33;
+  --mr-returned-bg: #e8f0fe;  --mr-returned-fg: #1a73e8;
+  --mr-rejected-bg: #fce8e6;  --mr-rejected-fg: #d93025;
+
+  font-family: "Inter", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--mr-text);
+  padding: 32px 40px 64px;
+}
+
+.my-requests *,
+.my-requests *::before,
+.my-requests *::after {
+  box-sizing: border-box;
+}
+
+.my-requests [hidden] {
+  display: none !important;
+}
+
+.my-requests__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ---------- Title ---------- */
+.my-requests .mr-heading__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--mr-navy);
+}
+
+.my-requests .mr-heading__subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--mr-muted);
+}
+
+/* ---------- Toolbar: filters + sort ---------- */
+.my-requests .mr-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 22px 0 18px;
+}
+
+.my-requests .mr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.my-requests .mr-pill {
+  padding: 7px 18px;
+  border: 1px solid var(--mr-border);
+  border-radius: 999px;
+  background: var(--mr-white);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--mr-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.my-requests .mr-pill:hover {
+  border-color: #b9c2d3;
+  background: #f1f4fa;
+  color: var(--mr-navy);
+}
+
+.my-requests .mr-pill.is-active {
+  background: var(--mr-navy);
+  border-color: var(--mr-navy);
+  color: var(--mr-white);
+  font-weight: 600;
+}
+
+.my-requests .mr-pill:focus-visible,
+.my-requests .mr-sort__button:focus-visible,
+.my-requests .mr-button:focus-visible,
+.my-requests .mr-card__form-btn:focus-visible {
+  outline: 3px solid rgba(17, 43, 85, 0.35);
+  outline-offset: 2px;
+}
+
+/* ---------- Sort dropdown ---------- */
+.my-requests .mr-sort {
+  position: relative;
+}
+
+.my-requests .mr-sort__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--mr-border);
+  border-radius: 8px;
+  background: var(--mr-white);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--mr-navy);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.my-requests .mr-sort__button:hover {
+  background: #f1f4fa;
+}
+
+.my-requests .mr-sort__button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.my-requests .mr-sort__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 100%;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--mr-white);
+  border: 1px solid var(--mr-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(10, 30, 70, 0.14);
+}
+
+.my-requests .mr-sort__menu li {
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.my-requests .mr-sort__menu li:hover,
+.my-requests .mr-sort__menu li:focus-visible {
+  background: #f1f4fa;
+  outline: none;
+}
+
+.my-requests .mr-sort__menu li[aria-selected="true"] {
+  font-weight: 700;
+  color: var(--mr-navy);
+}
+
+/* =====================================================
+   STATE A - empty view
+   ===================================================== */
+.my-requests .mr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--mr-white);
+  border: 1px solid var(--mr-border);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(15, 35, 75, 0.05);
+}
+
+.my-requests .mr-empty__icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 18px;
+  fill: none;
+  stroke: #b8bcc5;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.my-requests .mr-empty__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--mr-navy);
+}
+
+.my-requests .mr-empty__text {
+  margin: 8px 0 26px;
+  font-size: 15.5px;
+  color: var(--mr-muted);
+}
+
+.my-requests .mr-button {
+  display: inline-block;
+  padding: 11px 26px;
+  border-radius: 6px;
+  background: var(--mr-navy);
+  color: var(--mr-white);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.my-requests .mr-button:hover {
+  background: var(--mr-navy-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(11, 31, 63, 0.25);
+}
+
+.my-requests .mr-button:active {
+  transform: translateY(0);
+}
+
+/* =====================================================
+   STATE B - request list
+   ===================================================== */
+.my-requests .mr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.my-requests .mr-card {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.1fr) minmax(0, 2fr) auto auto;
+  align-items: center;
+  gap: 28px;
+  padding: 22px 26px;
+  background: var(--mr-white);
+  border: 1px solid var(--mr-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 35, 75, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.my-requests .mr-card:hover {
+  box-shadow: 0 4px 14px rgba(15, 35, 75, 0.09);
+}
+
+/* left column */
+.my-requests .mr-card__id {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--mr-navy);
+}
+
+.my-requests .mr-card__submitted {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--mr-muted);
+}
+
+/* center column */
+.my-requests .mr-card__items {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--mr-text);
+}
+
+.my-requests .mr-card__timeline {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--mr-muted);
+}
+
+/* action button */
+.my-requests .mr-card__form-btn {
+  width: 118px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--mr-grey-btn);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #2d3646;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.my-requests .mr-card__form-btn:hover {
+  background: var(--mr-grey-btn-hover);
+}
+
+/* status badge */
+.my-requests .mr-badge {
+  display: inline-block;
+  width: 170px;
+  padding: 11px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.my-requests .mr-badge--pending  { background: var(--mr-pending-bg);  color: var(--mr-pending-fg); }
+.my-requests .mr-badge--approved { background: var(--mr-approved-bg); color: var(--mr-approved-fg); }
+.my-requests .mr-badge--returned { background: var(--mr-returned-bg); color: var(--mr-returned-fg); }
+.my-requests .mr-badge--rejected { background: var(--mr-rejected-bg); color: var(--mr-rejected-fg); }
+
+/* filter with no matches */
+.my-requests .mr-no-match {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--mr-muted);
+  background: var(--mr-white);
+  border: 1px dashed var(--mr-border);
+  border-radius: 10px;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 960px) {
+  .my-requests .mr-card {
+    grid-template-columns: 1fr auto;
+    gap: 16px 20px;
+  }
+
+  .my-requests .mr-card__meta,
+  .my-requests .mr-card__details {
+    grid-column: 1 / -1;
+  }
+
+  .my-requests .mr-card__form-btn,
+  .my-requests .mr-badge {
+    justify-self: start;
+  }
+
+  .my-requests .mr-badge {
+    justify-self: end;
+    width: 160px;
+  }
+}
+
+@media (max-width: 600px) {
+  .my-requests {
+    padding: 22px 16px 48px;
+  }
+
+  .my-requests .mr-heading__title {
+    font-size: 25px;
+  }
+
+  .my-requests .mr-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .my-requests .mr-sort__button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .my-requests .mr-sort__menu {
+    left: 0;
+    right: 0;
+  }
+
+  .my-requests .mr-card {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .my-requests .mr-badge {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  .my-requests .mr-card__form-btn {
+    width: auto;
+    padding: 10px 12px;
+  }
+
+  .my-requests .mr-empty {
+    min-height: 340px;
+  }
+}
