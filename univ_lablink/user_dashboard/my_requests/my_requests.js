@@ -1,66 +1,12 @@
 /* =====================================================
    My Requests page
-   - renders STATE A (empty) or STATE B (list) from the data array
+   - starts with the EMPTY view (no requests yet)
+   - when a request is added (RequestStore.add, see request_store.js) it is
+     saved in the browser and shown here as a list card
    - status filter pills + sort dropdown
-   - mock data for now; swap in real data with MyRequests.setRequests([...])
-
-   Preview the empty state without editing code:  my_requests.html?state=empty
    ===================================================== */
 (function () {
   "use strict";
-
-  // ---------- Mock data (replace with the real request history) ----------
-  var MOCK_REQUESTS = [
-    {
-      id: "REQ-2026-1015-042",
-      submitted: "2026-10-15",
-      items: [
-        { qty: 2,  name: "Beakers 250ml" },
-        { qty: 1,  name: "Digital Weighing Scale" },
-        { qty: 10, name: "Test Tubes" }
-      ],
-      borrow: "2026-10-15",
-      returnBy: "2026-10-22",
-      returnTime: "5:00 PM",
-      status: "pending"
-    },
-    {
-      id: "REQ-2026-1008-031",
-      submitted: "2026-10-08",
-      items: [
-        { qty: 1, name: "Microscope M-400" },
-        { qty: 2, name: "Glass Rods" }
-      ],
-      borrow: "2026-10-09",
-      returnBy: "2026-10-16",
-      returnTime: "5:00 PM",
-      status: "approved"
-    },
-    {
-      id: "REQ-2026-0928-017",
-      submitted: "2026-09-28",
-      items: [
-        { qty: 1, name: "Ethanol 95%" },
-        { qty: 1, name: "Bunsen Burner" }
-      ],
-      borrow: "2026-09-29",
-      returnBy: "2026-10-06",
-      returnTime: "5:00 PM",
-      status: "returned"
-    },
-    {
-      id: "REQ-2026-0912-004",
-      submitted: "2026-09-12",
-      items: [
-        { qty: 1, name: "Fume Hood Access" },
-        { qty: 2, name: "Safety Goggles" }
-      ],
-      borrow: "2026-09-13",
-      returnBy: "2026-09-20",
-      returnTime: "5:00 PM",
-      status: "rejected"
-    }
-  ];
 
   var STATUS_LABELS = {
     pending:  "Pending Approval",
@@ -80,7 +26,8 @@
   var state = {
     requests: [],
     filter: "all",
-    sort: "newest"
+    sort: "newest",
+    query: ""   // text typed in the header's search bar
   };
 
   // ---------- Elements ----------
@@ -95,7 +42,7 @@
   // ---------- Helpers ----------
   // "2026-10-15" -> local Date (avoids the UTC off-by-one you get from new Date(string))
   function parseDate(iso) {
-    var p = iso.split("-");
+    var p = String(iso).split("-");
     return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
   }
 
@@ -121,6 +68,17 @@
     }).join(", ");
   }
 
+  // Ignore any stored record that is missing the fields a card needs
+  function isUsable(req) {
+    return req && req.id && req.submitted && req.borrow && req.returnBy &&
+           Array.isArray(req.items) && req.items.length > 0;
+  }
+
+  function loadRequests() {
+    var stored = window.RequestStore ? window.RequestStore.all() : [];
+    state.requests = stored.filter(isUsable);
+  }
+
   // ---------- Rendering ----------
   function cardHtml(req) {
     var status = STATUS_LABELS[req.status] ? req.status : "pending";
@@ -136,7 +94,7 @@
           '<p class="mr-card__items">' + escapeHtml(itemsText(req.items)) + "</p>" +
           '<p class="mr-card__timeline">Borrow ' + escapeHtml(fmtShort(req.borrow)) +
             " &middot; Return " + escapeHtml(fmtShort(req.returnBy)) + ", " +
-            escapeHtml(req.returnTime) + "</p>" +
+            escapeHtml(req.returnTime || "5:00 PM") + "</p>" +
         "</div>" +
         '<a class="mr-card__form-btn" href="' + escapeHtml(formUrl) + '">View Borrow<br>Request Form</a>' +
         '<span class="mr-badge mr-badge--' + status + '">' + STATUS_LABELS[status] + "</span>" +
@@ -145,13 +103,21 @@
   }
 
   function visibleRequests() {
+    var query = state.query.toLowerCase();
+
     var list = state.requests.filter(function (req) {
-      return state.filter === "all" || req.status === state.filter;
+      if (state.filter !== "all" && req.status !== state.filter) return false;
+      if (!query) return true;
+
+      // search the request id, the equipment names and the status text
+      var haystack = (req.id + " " + itemsText(req.items) + " " +
+                      (STATUS_LABELS[req.status] || "")).toLowerCase();
+      return haystack.indexOf(query) !== -1;
     });
 
     list.sort(function (a, b) {
       var diff = parseDate(a.submitted) - parseDate(b.submitted);
-      if (diff === 0) diff = a.id < b.id ? -1 : 1; // stable order for same-day requests
+      if (diff === 0) diff = a.id < b.id ? -1 : 1; // same-day requests: order by id
       return state.sort === "newest" ? -diff : diff;
     });
 
@@ -161,11 +127,9 @@
   function render() {
     var hasRequests = state.requests.length > 0;
 
-    // STATE A: no request history at all
+    // STATE A: no request history yet (this is what a new user sees)
     elEmpty.hidden = hasRequests;
     elList.hidden = !hasRequests;
-
-    // the filter pills and sort button stay visible in both states, like the design
 
     if (!hasRequests) {
       elNoMatch.hidden = true;
@@ -248,17 +212,32 @@
     }
   });
 
-  // ---------- Public API ----------
-  // MyRequests.setRequests([]) -> empty view,  MyRequests.setRequests([...]) -> list view
-  window.MyRequests = {
-    setRequests: function (requests) {
-      state.requests = Array.isArray(requests) ? requests : [];
-      render();
-    }
-  };
+  // ---------- Keep the page in sync with the store ----------
+  function refresh() {
+    loadRequests();
+    render();
+  }
+
+  // a request added in another tab
+  window.addEventListener("storage", function (event) {
+    if (event.key === window.RequestStore.KEY || event.key === null) refresh();
+  });
+
+  // coming back to this page with the browser's back button
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) refresh();
+  });
+
+  // ---------- Shared header search ----------
+  // header.js fires "header:search" when the Search button is pressed.
+  // Here it filters the request list by ID, equipment or status.
+  document.addEventListener("header:search", function (event) {
+    state.query = (event.detail && event.detail.query) || "";
+    render();
+  });
+
+  window.MyRequests = { refresh: refresh };
 
   // ---------- Start ----------
-  var forceEmpty = new URLSearchParams(window.location.search).get("state") === "empty";
-  state.requests = forceEmpty ? [] : MOCK_REQUESTS.slice();
-  render();
+  refresh();
 })();

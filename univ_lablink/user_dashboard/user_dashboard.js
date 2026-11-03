@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------------
    Data sources (swap the two read functions for your API when ready):
 
-   localStorage "lablink_user"      {"name":"Katrina Mendoza","role":"Student"}
+   localStorage "lablink_user"      {"name":"Katrina Mendoza","role":"User"}
        -> written by your login page. Missing/empty name => "User".
 
    localStorage "lablink_requests"  [
