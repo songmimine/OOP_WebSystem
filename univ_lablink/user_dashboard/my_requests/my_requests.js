@@ -26,7 +26,8 @@
   var state = {
     requests: [],
     filter: "all",
-    sort: "newest"
+    sort: "newest",
+    query: ""   // text typed in the header's search bar
   };
 
   // ---------- Elements ----------
@@ -102,8 +103,16 @@
   }
 
   function visibleRequests() {
+    var query = state.query.toLowerCase();
+
     var list = state.requests.filter(function (req) {
-      return state.filter === "all" || req.status === state.filter;
+      if (state.filter !== "all" && req.status !== state.filter) return false;
+      if (!query) return true;
+
+      // search the request id, the equipment names and the status text
+      var haystack = (req.id + " " + itemsText(req.items) + " " +
+                      (STATUS_LABELS[req.status] || "")).toLowerCase();
+      return haystack.indexOf(query) !== -1;
     });
 
     list.sort(function (a, b) {
@@ -217,6 +226,14 @@
   // coming back to this page with the browser's back button
   window.addEventListener("pageshow", function (event) {
     if (event.persisted) refresh();
+  });
+
+  // ---------- Shared header search ----------
+  // header.js fires "header:search" when the Search button is pressed.
+  // Here it filters the request list by ID, equipment or status.
+  document.addEventListener("header:search", function (event) {
+    state.query = (event.detail && event.detail.query) || "";
+    render();
   });
 
   window.MyRequests = { refresh: refresh };
