@@ -32,6 +32,11 @@ ACCOUNTS = {
         "role": "user",
         "password_hash": generate_password_hash("lab123"),
     },
+    "2025-2-00002": {
+            "name": "Charmaine Tablatin",
+            "role": "user",
+            "password_hash": generate_password_hash("cha123"),
+        }
 }
 
 # Where each role lands after a successful login (relative to site root)
