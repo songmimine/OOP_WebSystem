@@ -56,7 +56,7 @@
           localStorage.setItem("lablink_session", JSON.stringify({ role: result.data.role }));
           localStorage.setItem("lablink_user", JSON.stringify({
             name: result.data.name,
-            role: result.data.role === "admin" ? "Laboratory Staff" : "Student"
+            role: result.data.role === "admin" ? "Laboratory Staff" : "User"
           }));
         } catch (e) { /* storage unavailable */ }
 
