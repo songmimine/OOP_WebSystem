@@ -1,0 +1,169 @@
+/* =========================================================
+   Admin Header – LPU Cavite Laboratory Equipment System
+   Reference layout: 1440px wide (all values measured from the
+   screenshot and scaled x1.5625). Styles are scoped to
+   .admin-header so the component can be dropped into any page.
+   ========================================================= */
+.admin-header {
+  --ah-bg: #f7f7f7;
+  --ah-border: #abb3bb;
+  --ah-navy: #0b223b;
+  --ah-btn: #133049;
+  --ah-search-bg: #ebeef6;
+  --ah-search-icon: #495989;
+  --ah-placeholder: #868fae;
+  --ah-title: #010101;
+  --ah-date: #6a7b8e;
+  --ah-name: #3d4451;
+  --ah-role: #a8a9b1;
+  --ah-avatar: #e2e5ec;
+  --ah-red: #f14b6b;
+  --ah-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --ah-font-nav: "Roboto", "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+
+  font-family: var(--ah-font);
+  -webkit-font-smoothing: antialiased;
+}
+.admin-header, .admin-header *, .admin-header *::before, .admin-header *::after { box-sizing: border-box; }
+.admin-header ul { margin: 0; padding: 0; list-style: none; }
+.admin-header a { text-decoration: none; color: inherit; }
+.admin-header button, .admin-header input { font-family: inherit; }
+.admin-header svg { display: block; flex-shrink: 0; }
+
+/* ---------- Top bar ---------- */
+.ah-topbar {
+  display: flex;
+  align-items: center;
+  height: 109px;
+  padding: 27px 34px 0 36px;
+  background: var(--ah-bg);
+  border-bottom: 1px solid var(--ah-border);
+}
+
+.ah-brand { display: flex; align-items: center; flex-shrink: 0; }
+.ah-brand__logo { display: block; width: 144px; height: 62px; object-fit: contain; }
+.ah-brand__divider {
+  width: 3px; height: 56px;
+  margin: 0 19px 0 27px;
+  background: #1a1a1a;
+}
+.ah-brand__title {
+  font-size: 15.5px; line-height: 20px; font-weight: 700;
+  color: var(--ah-title); letter-spacing: 0;
+}
+
+/* ---------- Search ---------- */
+.ah-search {
+  display: flex; align-items: stretch;
+  flex-shrink: 1;
+  width: 570px; max-width: 100%; height: 39px;
+  margin: 0 0 0 52px;
+  border-radius: 20px 0 0 20px;
+  overflow: hidden;
+}
+.ah-search__icon {
+  display: flex; align-items: center;
+  padding: 0 16px 0 16px;
+  background: var(--ah-search-bg);
+  color: var(--ah-search-icon);
+}
+.ah-search__icon svg { width: 16px; height: 16px; }
+.ah-search__input {
+  flex: 1; min-width: 0;
+  border: 0; outline: 0; padding: 0;
+  background: var(--ah-search-bg);
+  font-size: 11px; font-weight: 400; color: #2a3350;
+}
+.ah-search__input::placeholder { color: var(--ah-placeholder); opacity: 1; }
+.ah-search__input::-webkit-search-cancel-button { display: none; }
+
+.ah-search__btn {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  width: 128px; padding: 0 9px 0 20px;
+  border: 0; background: var(--ah-btn); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background .15s ease;
+}
+.ah-search__btn:hover { background: #1b4263; }
+.ah-search__btn svg { width: 22px; height: 22px; color: #cdd3d8; }
+
+/* ---------- Right cluster ---------- */
+.ah-utility { display: flex; align-items: center; margin-left: auto; padding-left: 24px; }
+
+.ah-datetime {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--ah-date); white-space: nowrap;
+}
+.ah-datetime svg { width: 17px; height: 17px; color: #3d576e; }
+.ah-datetime__sep { width: 1px; height: 14px; margin: 0 6px; background: #c5ccd4; }
+
+.ah-bell {
+  position: relative;
+  display: grid; place-items: center;
+  width: 27px; height: 27px; margin-left: 25px; padding: 0;
+  border: 0; background: transparent; color: #a3acb8; cursor: pointer;
+}
+.ah-bell svg { width: 19px; height: 19px; }
+.ah-bell__badge {
+  position: absolute; top: 0; right: 4px;
+  min-width: 13px; height: 13px; padding: 0 3px;
+  border-radius: 7px; background: var(--ah-red); color: #fff;
+  font-size: 8px; font-weight: 700; line-height: 13px; text-align: center;
+}
+.ah-bell__badge[hidden] { display: none; }
+
+.ah-utility__divider { width: 1px; height: 28px; margin: 0 12px 0 0; background: #e3e4e7; }
+
+.ah-user { display: flex; align-items: center; gap: 12px; }
+.ah-user__avatar {
+  display: grid; place-items: center;
+  width: 27px; height: 27px; border-radius: 50%;
+  background: var(--ah-avatar); color: #4b5870;
+  font-size: 9px; font-weight: 600;
+}
+.ah-user__meta { display: flex; flex-direction: column; line-height: 1.2; }
+.ah-user__name { font-size: 12px; font-weight: 700; color: var(--ah-name); white-space: nowrap; }
+.ah-user__role { font-size: 9.5px; font-weight: 400; color: var(--ah-role); }
+
+/* ---------- Navigation bar ---------- */
+.ah-nav { height: 52px; background: var(--ah-navy); overflow-x: auto; }
+.ah-nav__list {
+  display: flex; align-items: center; justify-content: center;
+  gap: 42px; height: 100%; min-width: max-content;
+  padding: 0 24px 0 42px;
+}
+.ah-nav__link {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--ah-font-nav); font-size: 15.5px; font-weight: 500;
+  color: #e8edf4; white-space: nowrap;
+  transition: color .15s ease;
+}
+.ah-nav__link svg { width: 23px; height: 23px; }
+.ah-nav__link:hover,
+.ah-nav__link.is-active { color: #fff; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1360px) {
+  .ah-search { width: 440px; margin-left: 32px; }
+  .ah-nav__list { gap: 32px; }
+}
+
+@media (max-width: 1180px) {
+  .ah-datetime { display: none; }
+  .ah-search { width: 380px; }
+}
+
+@media (max-width: 900px) {
+  .ah-topbar { flex-wrap: wrap; height: auto; padding: 14px 20px; row-gap: 12px; }
+  .ah-utility { padding-left: 0; }
+  .ah-search { order: 3; width: 100%; margin: 0; }
+  .ah-nav__list { justify-content: flex-start; padding: 0 20px; }
+}
+
+@media (max-width: 560px) {
+  .ah-brand__logo { width: 104px; height: 45px; }
+  .ah-brand__divider { margin: 0 12px; height: 40px; }
+  .ah-brand__title { font-size: 12px; line-height: 16px; }
+  .ah-user__meta { display: none; }
+}
