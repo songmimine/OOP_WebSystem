@@ -24,21 +24,25 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         Dashboard
       </a>
-      <a href="inventory_records.html" class="nav-link">
+      <a href="inventory_records/inventory_records.html" class="nav-link">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><circle cx="6.5" cy="16.5" r="3.5"/><circle cx="17.5" cy="16.5" r="3.5"/></svg>
         Inventory Records
       </a>
-      <a href="borrow_requests.html" class="nav-link">
+      <a href="borrow_requests/borrow_requests.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2h-1"/><path d="M8.5 13h7M8.5 17h5"/></svg>
         Borrow Requests
       </a>
-      <a href="return_confirmation.html" class="nav-link">
+      <a href="return_confirmation/return_confirmation.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
         Return Confirmation
       </a>
-      <a href="reports.html" class="nav-link">
+      <a href="records_history.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>
         Reports
+      </a>
+      <a href="user_directory.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.6 2.7-5.5 6.5-5.5s6 1.9 6.5 5.5M16 5.5a3 3 0 0 1 0 5.8M18 15c2 .7 3.2 2.3 3.5 5"/></svg>
+        User Directory
       </a>
       <a href="settings.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M3 8h9M16 8h5M3 16h4M11 16h10"/><circle cx="14" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg>
@@ -62,7 +66,7 @@
         <button class="avatar" id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">AR</button>
         <div class="profile-menu" id="profileMenu" role="menu">
           <a href="settings.html" role="menuitem">Account settings</a>
-          <a href="login.html" role="menuitem" class="logout">logout</a>
+          <a href="../index.html" role="menuitem" class="logout">Log out</a>
         </div>
       </div>
     </header>
@@ -74,7 +78,7 @@
 
       <!-- STAT CARDS -->
       <section class="stats" aria-label="Request summary">
-        <a href="borrow_requests.html?status=pending" class="stat-card">
+        <a href="borrow_requests/borrow_requests.html?status=pending" class="stat-card">
           <div class="stat-head">
             <span>Pending Requests</span>
             <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
@@ -83,7 +87,7 @@
           <small>Awaiting review</small>
         </a>
 
-        <a href="borrow_requests.html?status=approved" class="stat-card">
+        <a href="borrow_requests/borrow_requests.html?status=approved" class="stat-card">
           <div class="stat-head">
             <span>Approved Requests</span>
             <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-4.9"/></svg></span>
@@ -92,7 +96,7 @@
           <small>Active borrowings</small>
         </a>
 
-        <a href="borrow_requests.html?status=rejected" class="stat-card">
+        <a href="borrow_requests/borrow_requests.html?status=rejected" class="stat-card">
           <div class="stat-head">
             <span>Rejected Requests</span>
             <span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m9.2 9.2 5.6 5.6M14.8 9.2l-5.6 5.6"/></svg></span>
@@ -101,7 +105,7 @@
           <small>Not approved</small>
         </a>
 
-        <a href="borrow_requests.html" class="stat-card">
+        <a href="borrow_requests/borrow_requests.html" class="stat-card">
           <div class="stat-head">
             <span>Total Borrowing Requests</span>
             <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5a2 2 0 0 0-2-2h-1"/><path d="M8.5 13h7M8.5 17h5"/></svg></span>
@@ -118,7 +122,7 @@
             <h2 id="pending-title">Pending requests for approval</h2>
             <p>Review the latest student borrowing requests.</p>
           </div>
-          <a href="borrow_requests.html" class="btn-outline">View all requests</a>
+          <a href="borrow_requests/borrow_requests.html" class="btn-outline">View all requests</a>
         </div>
 
         <div class="table-wrap">
@@ -142,7 +146,7 @@
                 <td>21 Oct 2026</td>
                 <td>25 Oct 2026</td>
                 <td><span class="badge">Pending</span></td>
-                <td><a href="review_request.html?id=BR-2026-104" class="review-link">Review <span class="arrow">→</span></a></td>
+                <td><a href="borrow_requests/borrow_requests.html" class="review-link">Review <span class="arrow">→</span></a></td>
               </tr>
               <tr>
                 <td class="req-id">BR-2026-103</td>
@@ -151,7 +155,7 @@
                 <td>22 Oct 2026</td>
                 <td>26 Oct 2026</td>
                 <td><span class="badge">Pending</span></td>
-                <td><a href="review_request.html?id=BR-2026-103" class="review-link">Review <span class="arrow">→</span></a></td>
+                <td><a href="borrow_requests/borrow_requests.html" class="review-link">Review <span class="arrow">→</span></a></td>
               </tr>
               <tr>
                 <td class="req-id">BR-2026-102</td>
@@ -160,7 +164,7 @@
                 <td>20 Oct 2026</td>
                 <td>24 Oct 2026</td>
                 <td><span class="badge">Pending</span></td>
-                <td><a href="review_request.html?id=BR-2026-102" class="review-link">Review <span class="arrow">→</span></a></td>
+                <td><a href="borrow_requests/borrow_requests.html" class="review-link">Review <span class="arrow">→</span></a></td>
               </tr>
             </tbody>
           </table>
@@ -170,6 +174,7 @@
   </div>
 
   <div class="scrim" id="scrim"></div>
+  <script src="../portal-store.js"></script>
   <script src="admin_dashboard.js"></script>
 </body>
 </html>

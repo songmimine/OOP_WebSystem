@@ -1,7 +1,7 @@
 /* =====================================================
    My Requests page
    - starts with the EMPTY view (no requests yet)
-   - when a request is added (RequestStore.add, see request_store.js) it is
+   - when a request is added (RequestStore.add in portal-store.js) it is
      saved in the browser and shown here as a list card
    - status filter pills + sort dropdown
    ===================================================== */
@@ -11,6 +11,8 @@
   var STATUS_LABELS = {
     pending:  "Pending Approval",
     approved: "Approved",
+    active:   "Borrowed",
+    return_requested: "Return Requested",
     returned: "Returned",
     rejected: "Rejected"
   };
@@ -222,6 +224,7 @@
   window.addEventListener("storage", function (event) {
     if (event.key === window.RequestStore.KEY || event.key === null) refresh();
   });
+  window.addEventListener("lablink:data-changed", refresh);
 
   // coming back to this page with the browser's back button
   window.addEventListener("pageshow", function (event) {

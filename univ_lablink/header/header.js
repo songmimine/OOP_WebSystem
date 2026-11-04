@@ -144,6 +144,89 @@
     });
   }
 
+  function initSearch(root) {
+    var form = root.querySelector(".msh-search");
+    var input = root.querySelector(".msh-search-input");
+    if (!form || !input) return;
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var detail = { query: input.value.trim() };
+      document.dispatchEvent(new CustomEvent("header:search", { detail: detail }));
+      if (!document.querySelector(".my-requests") &&
+          !document.querySelector("#catalog-grid") &&
+          detail.query) {
+        window.location.href = new URL(
+          "user_dashboard/equipment_catalog/equipment_catalog.html?q=" + encodeURIComponent(detail.query),
+          ROOT_DIR
+        ).href;
+      }
+    });
+  }
+
+  function initNotifications(root) {
+    var bell = root.querySelector(".msh-bell");
+    if (!bell || document.getElementById("notif-panel")) return;
+    var panel = document.createElement("section");
+    panel.className = "msh-notif-panel";
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Notifications");
+    panel.setAttribute("aria-labelledby", "msh-notif-title");
+    panel.hidden = true;
+    panel.innerHTML = '<div class="msh-notif-panel__head"><strong id="msh-notif-title">Notifications</strong><button type="button" aria-label="Close notifications">×</button></div><ul></ul><p class="msh-notif-panel__empty" hidden>You are all caught up.</p>';
+    root.appendChild(panel);
+    var list = panel.querySelector("ul");
+    var empty = panel.querySelector(".msh-notif-panel__empty");
+    var close = panel.querySelector("button");
+    bell.setAttribute("aria-haspopup", "dialog");
+    bell.setAttribute("aria-controls", "msh-notif-panel");
+    panel.id = "msh-notif-panel";
+
+    function render() {
+      var requests = [];
+      try {
+        requests = JSON.parse(localStorage.getItem("lablink_requests") || "[]");
+      } catch (error) {
+        console.error("[LabLink notifications] Saved request data is invalid.", error);
+      }
+      var labels = { pending: "is pending approval", approved: "was approved", rejected: "was declined", active: "is currently borrowed", return_requested: "has a return awaiting inspection", returned: "was returned" };
+      list.textContent = "";
+      requests.slice(0, 5).forEach(function (request) {
+        var item = document.createElement("li");
+        var title = document.createElement("strong");
+        var detail = document.createElement("span");
+        title.textContent = request.id || "Borrow request";
+        detail.textContent = "Your request " + (labels[request.status] || "was updated");
+        item.appendChild(title);
+        item.appendChild(detail);
+        list.appendChild(item);
+      });
+      empty.hidden = requests.length > 0;
+      list.hidden = requests.length === 0;
+    }
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      bell.setAttribute("aria-expanded", String(open));
+      if (open) render();
+    }
+    bell.addEventListener("click", function (event) {
+      event.stopPropagation();
+      setOpen(panel.hidden);
+    });
+    close.addEventListener("click", function () { setOpen(false); bell.focus(); });
+    document.addEventListener("click", function (event) {
+      if (!panel.hidden && !panel.contains(event.target) && !bell.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !panel.hidden) {
+        setOpen(false);
+        bell.focus();
+      }
+    });
+    window.addEventListener("lablink:data-changed", render);
+    window.addEventListener("storage", render);
+  }
+
   /* ---------- Paths & active link ---------- */
   function resolvePaths(root) {
     root.querySelectorAll("[data-src]").forEach(function (el) {
@@ -170,6 +253,8 @@
     resolvePaths(root);
     startClock(root);
     initProfileMenu(root);
+    initSearch(root);
+    initNotifications(root);
 
     if (activeKey) setActive(activeKey);
 

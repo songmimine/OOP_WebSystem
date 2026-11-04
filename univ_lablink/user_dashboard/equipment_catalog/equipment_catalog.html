@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Equipment Catalog | Laboratory Equipment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../portal-pages.css">
+</head>
+<body class="portal-page">
+  <div id="lablink-header" data-active="catalog"></div>
+  <script src="../../header/header.js"></script>
+  <main class="portal-main">
+    <div class="portal-heading">
+      <div>
+        <p class="portal-kicker">Inventory / Equipments Catalog</p>
+        <h1>Laboratory Inventory List</h1>
+        <p>Explore laboratory equipment, glassware, and chemicals. Select items to start a borrowing request.</p>
+      </div>
+      <a class="portal-button" href="../borrow_request_form/borrow_request_form.html">Review request <span id="catalog-selection-count">0</span></a>
+    </div>
+    <div class="portal-toolbar">
+      <input id="catalog-search" type="search" placeholder="Search by item name..." aria-label="Search equipment">
+      <label class="portal-field" style="min-width:210px">
+        <span class="portal-label">Filter by category</span>
+        <select id="catalog-category" class="portal-select">
+          <option value="all">All categories</option>
+        </select>
+      </label>
+    </div>
+    <div class="portal-categories" id="catalog-categories" role="group" aria-label="Equipment categories"></div>
+    <section class="portal-grid" id="catalog-grid" aria-live="polite"></section>
+    <div class="portal-empty" id="catalog-empty" hidden>
+      <h2>No matching equipment</h2>
+      <p>Try a different search or category.</p>
+    </div>
+  </main>
+  <p class="portal-toast" id="portal-toast" role="status" hidden></p>
+  <script src="../../portal-store.js"></script>
+  <script src="equipment_catalog.js"></script>
+</body>
+</html>

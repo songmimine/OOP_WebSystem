@@ -20,6 +20,46 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const store = window.LabLinkStore;
+
+  function renderStoredRequests() {
+    if (!store) return;
+    const requests = store.requests();
+    const counts = [
+      requests.filter((request) => request.status === "pending").length,
+      requests.filter((request) => request.status === "approved" || request.status === "active").length,
+      requests.filter((request) => request.status === "rejected").length,
+      requests.length
+    ];
+    document.querySelectorAll(".stat-number").forEach((el, index) => {
+      el.dataset.count = String(counts[index]);
+      el.textContent = String(counts[index]);
+    });
+    const body = document.querySelector(".panel tbody");
+    const pending = requests.filter((request) => request.status === "pending").slice(0, 5);
+    if (!pending.length) {
+      body.innerHTML = '<tr><td colspan="7" class="portal-muted">No pending requests. New student requests will appear here.</td></tr>';
+      return;
+    }
+    const escape = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[char]));
+    body.innerHTML = pending.map((request) => {
+      const equipment = request.items.map((item) => item.name + " ×" + item.qty).join(", ");
+      return `<tr><td class="req-id">${escape(request.id)}</td><td><span class="student">${escape(request.studentName)}</span><span class="course">${escape(request.department)}</span></td><td>${escape(equipment)}</td><td>${escape(request.borrow)}</td><td>${escape(request.returnBy)}</td><td><span class="badge">Pending</span></td><td><a href="borrow_requests/borrow_requests.html" class="review-link">Review <span class="arrow">→</span></a></td></tr>`;
+    }).join("");
+    document.querySelectorAll("tbody tr").forEach((row) => {
+      const link = row.querySelector(".review-link");
+      if (!link) return;
+      row.style.cursor = "pointer";
+      row.addEventListener("click", (event) => {
+        if (!event.target.closest("a")) window.location.href = link.href;
+      });
+    });
+  }
+  renderStoredRequests();
+  window.addEventListener("lablink:data-changed", renderStoredRequests);
+  window.addEventListener("storage", renderStoredRequests);
 
   /* ---- 1. Count-up on the stat numbers ---- */
   if (!reduceMotion) {

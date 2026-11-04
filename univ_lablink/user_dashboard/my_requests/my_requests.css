@@ -340,6 +340,8 @@ body {
 .my-requests .mr-badge--approved { background: var(--mr-approved-bg); color: var(--mr-approved-fg); }
 .my-requests .mr-badge--returned { background: var(--mr-returned-bg); color: var(--mr-returned-fg); }
 .my-requests .mr-badge--rejected { background: var(--mr-rejected-bg); color: var(--mr-rejected-fg); }
+.my-requests .mr-badge--active { background: var(--mr-approved-bg); color: var(--mr-approved-fg); }
+.my-requests .mr-badge--return_requested { background: var(--mr-pending-bg); color: var(--mr-pending-fg); }
 
 /* filter with no matches */
 .my-requests .mr-no-match {
