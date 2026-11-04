@@ -270,6 +270,59 @@
   box-sizing: content-box;
 }
 
+.main-system-header .msh-notif-panel {
+  position: absolute;
+  top: 100%;
+  right: 24px;
+  z-index: 20;
+  width: min(360px, calc(100vw - 32px));
+  padding: 15px;
+  border: 1px solid var(--msh-line);
+  border-radius: 12px;
+  background: var(--msh-white);
+  box-shadow: 0 12px 30px rgba(15, 32, 64, .18);
+}
+
+.main-system-header .msh-notif-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  color: var(--msh-navy);
+}
+
+.main-system-header .msh-notif-panel__head button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 22px;
+}
+
+.main-system-header .msh-notif-panel__head button:hover {
+  background: var(--msh-field);
+}
+
+.main-system-header .msh-notif-panel ul {
+  display: grid;
+  gap: 8px;
+}
+
+.main-system-header .msh-notif-panel li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f5f7fb;
+  font-size: 12px;
+}
+
+.main-system-header .msh-notif-panel li span,
+.main-system-header .msh-notif-panel__empty {
+  color: var(--msh-muted);
+}
+
 /* Profile */
 .main-system-header .msh-profile {
   position: relative;

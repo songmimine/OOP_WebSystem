@@ -51,11 +51,20 @@
           return;
         }
 
-        // Keep what the existing dashboards read from localStorage
+        // Keep the dashboard user details available while respecting the session checkbox.
         try {
-          localStorage.setItem("lablink_session", JSON.stringify({ role: result.data.role }));
+          var sessionValue = JSON.stringify({ role: result.data.role });
+          var remember = form.querySelector('input[name="remember"]').checked;
+          if (remember) {
+            localStorage.setItem("lablink_session", sessionValue);
+            sessionStorage.removeItem("lablink_session");
+          } else {
+            sessionStorage.setItem("lablink_session", sessionValue);
+            localStorage.removeItem("lablink_session");
+          }
           localStorage.setItem("lablink_user", JSON.stringify({
             name: result.data.name,
+            id: id,
             role: result.data.role === "admin" ? "Laboratory Staff" : "User"
           }));
         } catch (e) { /* storage unavailable */ }
@@ -74,4 +83,3 @@
   idInput.addEventListener("input", clearError);
   pwInput.addEventListener("input", clearError);
 })();
-

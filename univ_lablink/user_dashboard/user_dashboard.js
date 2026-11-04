@@ -38,9 +38,9 @@
   };
   var UPCOMING_DAYS = 3;   // deadlines appear this many days ahead
   var MAX_LISTED = 5;      // requests shown on the dashboard
-  var OPEN_STATUSES = { pending: 1, approved: 1, active: 1, overdue: 1 };
-  var STATUS_LABEL = { pending: "Pending", approved: "Approved", active: "Active", overdue: "Overdue" };
-  var STATUS_ORDER = { overdue: 0, active: 1, approved: 2, pending: 3 };
+  var OPEN_STATUSES = { pending: 1, approved: 1, active: 1, overdue: 1, return_requested: 1 };
+  var STATUS_LABEL = { pending: "Pending", approved: "Approved", active: "Active", overdue: "Overdue", return_requested: "Return requested" };
+  var STATUS_ORDER = { overdue: 0, return_requested: 1, active: 2, approved: 3, pending: 4 };
   var EVENT_ORDER = ["pickup", "return", "pending"];
   var EVENT_LABEL = { pickup: "pickup or borrow", "return": "return or due", pending: "pending" };
 
@@ -195,7 +195,7 @@
     var forReturn = 0;
     var overdue = 0;
     reqs.forEach(function (r) {
-      if (r.status === "active") forReturn += r.qty;
+      if (r.status === "active" || r.status === "return_requested") forReturn += r.qty;
       if (r.status === "overdue") overdue += r.qty;
     });
     $("stat-active").textContent = String(reqs.length);
@@ -561,6 +561,7 @@
 
     // Stay in sync with other tabs and with a day rollover
     window.addEventListener("storage", renderAll);
+    window.addEventListener("lablink:data-changed", renderAll);
     setInterval(function () {
       if (dateKey(new Date()) !== dateKey(today)) renderAll();
     }, 60000);
