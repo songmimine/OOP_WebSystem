@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LPU Cavite | Laboratory Equipment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <!-- Brand -->
+    <a class="brand" href="#" aria-label="LPU Cavite Laboratory Equipment System">
+      <img class="brand__logo" src="assets/lpu-cavite-logo.png" alt="Lyceum of the Philippines University Cavite" width="92" height="40" />
+      <span class="brand__divider" aria-hidden="true"></span>
+      <span class="brand__title">LABORATORY<br />EQUIPMENT SYSTEM</span>
+    </a>
+
+    <!-- Search -->
+    <form class="search" id="searchForm" role="search">
+      <span class="search__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </span>
+      <input class="search__input" id="searchInput" type="search" placeholder="Search equipment, requests, or ID..." autocomplete="off" aria-label="Search" />
+      <button class="search__btn" type="submit">
+        <span>Search</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+
+    <!-- Right cluster -->
+    <div class="utility">
+      <div class="datetime" id="datetime" data-live="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+        <span id="dateText">Oct 26, 2025</span>
+        <span class="datetime__sep" aria-hidden="true">|</span>
+        <span id="timeText">7:45 PM</span>
+      </div>
+
+      <button class="bell" id="notifBtn" type="button" aria-label="Notifications, 3 unread">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <span class="bell__badge" id="notifBadge">3</span>
+      </button>
+
+      <span class="utility__divider" aria-hidden="true"></span>
+
+      <div class="user">
+        <span class="user__avatar">DR</span>
+        <span class="user__meta">
+          <strong class="user__name">Dr. Aris Thorne</strong>
+          <small class="user__role">Admin</small>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="mainnav" aria-label="Primary">
+    <ul class="mainnav__list">
+      <li>
+        <a class="mainnav__link is-active" href="#dashboard">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M12 2.8 2.5 11.4a.8.8 0 0 0 .5 1.4H5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-7.2h2a.8.8 0 0 0 .5-1.4L12 2.8Z"/></svg>
+          <span>Admin Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a class="mainnav__link" href="#equipment">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6.2L4.6 18.4A1.8 1.8 0 0 0 6.2 21h11.6a1.8 1.8 0 0 0 1.6-2.6L14 9.2V3"/><path d="M7.2 14.5h9.6"/></svg>
+          <span>Equipment Management</span>
+        </a>
+      </li>
+      <li>
+        <a class="mainnav__link" href="#borrowing">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="4" rx="1"/><path d="M9 11.5h6M9 15.5h6"/></svg>
+          <span>Borrowing Requests</span>
+        </a>
+      </li>
+      <li>
+        <a class="mainnav__link" href="#returns">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 0 1-14.6 5.9M3.5 12a8.5 8.5 0 0 1 14.6-5.9"/><path d="M18.5 2.5v4h-4M5.5 21.5v-4h4"/></svg>
+          <span>Return Management</span>
+        </a>
+      </li>
+      <li>
+        <a class="mainnav__link" href="#records">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3.5h10a1.5 1.5 0 0 1 1.5 1.5v13a3 3 0 0 1-3 3H6.5a3 3 0 0 1-3-3v-1.5H14v1.5a1.5 1.5 0 0 0 3 0"/><path d="M8 3.5A1.5 1.5 0 0 0 6.5 5v12.5M10.5 8h6M10.5 12h6"/></svg>
+          <span>Records &amp; History</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>
