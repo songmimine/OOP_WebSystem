@@ -1,9 +1,40 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Return Management | LabLink Admin</title><link rel="stylesheet" href="../../portal-pages.css"></head>
-<body class="admin-portal-page" data-admin-page="returns">
-  <div id="admin-app"></div>
-  <script src="../../portal-store.js"></script>
-  <script src="../admin_pages.js"></script>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Return Management | University LabLink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../portal-pages.css"><link rel="stylesheet" href="return_confirmation.css">
+</head>
+<body class="admin-portal-page">
+  <div id="admin-header-mount" data-active="returns"></div>
+  <main class="admin-content">
+    <div class="portal-heading"><div><p class="portal-kicker">Transactions / Returns</p><h1>Return Management</h1><p>Review user return submissions, inspect equipment condition, and record each quantity received.</p></div></div>
+    <section class="portal-card">
+      <div class="portal-toolbar"><input class="portal-input" id="return-search" type="search" aria-label="Search transactions" placeholder="Search borrower, transaction, or equipment">
+        <label class="portal-field"><span class="portal-label">Show</span><select class="portal-select" id="return-filter"><option value="all">All active loans</option><option value="return_requested">Return submitted</option><option value="overdue">Overdue</option></select></label>
+      </div>
+      <div class="portal-table-wrap"><table class="portal-table return-table"><thead><tr><th>Transaction</th><th>Borrower</th><th>Equipment / outstanding</th><th>Released</th><th>Return deadline</th><th>Status</th><th>Actions</th></tr></thead><tbody id="return-rows"><tr><td colspan="7">Loading transactions…</td></tr></tbody></table></div>
+    </section>
+    <dialog class="portal-modal inspection-dialog" id="inspection-dialog">
+      <div class="portal-heading"><div><p class="portal-kicker">Staff inspection</p><h2 id="inspection-title">Record equipment return</h2></div><button class="portal-button portal-button--secondary portal-button--small" id="inspection-close" type="button">Close</button></div>
+      <p class="portal-muted">Enter only the quantities physically received. Outstanding units remain on the transaction.</p>
+      <form id="inspection-form"><div id="inspection-items"></div><button class="portal-button" id="inspection-submit" type="submit">Confirm inspected return</button></form>
+    </dialog>
+    <dialog class="portal-modal case-dialog" id="case-dialog">
+      <div class="portal-heading"><div><p class="portal-kicker">Other laboratory case</p><h2>Record an incident</h2></div><button class="portal-button portal-button--secondary portal-button--small" id="case-close" type="button">Close</button></div>
+      <form id="case-form" class="portal-form-grid">
+        <label class="portal-field portal-field--wide"><span class="portal-label">Borrowed item</span><select class="portal-select" id="case-item" required></select></label>
+        <label class="portal-field"><span class="portal-label">Case type</span><select class="portal-select" id="case-type" required><option>Damaged</option><option>Lost</option><option>Overdue</option><option>Improper Return</option></select></label>
+        <label class="portal-field"><span class="portal-label">Quantity</span><input class="portal-input" id="case-quantity" type="number" min="1" step="1" value="1" required></label>
+        <label class="portal-field portal-field--wide"><span class="portal-label">Description</span><textarea class="portal-textarea" id="case-description" required maxlength="1000"></textarea></label>
+        <div class="portal-field--wide"><button class="portal-button" type="submit">Save case record</button></div>
+      </form>
+    </dialog>
+    <div id="admin-footer-mount"></div>
+  </main>
+  <p class="portal-toast" id="admin-toast" role="status" hidden></p>
+  <script src="../admin_pages.js"></script><script src="../../admin_header/admin_header.js"></script><script src="../../admin_footer/admin_footer.js"></script><script src="return_confirmation.js"></script>
 </body>
 </html>

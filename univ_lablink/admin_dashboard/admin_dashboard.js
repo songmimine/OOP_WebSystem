@@ -1,151 +1,53 @@
-/* ---- Access guard: only a logged-in admin may view this page ---- */
 (function () {
-  const logoutLink = document.querySelector(".logout");
-  const loginUrl = logoutLink ? logoutLink.getAttribute("href") : "login.html";
-  let session = null;
-  try {
-    session = JSON.parse(localStorage.getItem("lablink_session") || sessionStorage.getItem("lablink_session"));
-  } catch (e) {}
-  if (!session || session.role !== "admin") {
-    window.location.replace(loginUrl);
-    return;
-  }
-  if (logoutLink) {
-    logoutLink.addEventListener("click", () => {
-      localStorage.removeItem("lablink_session");
-      sessionStorage.removeItem("lablink_session");
-    });
-  }
-})();
+  "use strict";
+  var admin = window.LabLinkAdmin;
+  var searchQuery = "";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const store = window.LabLinkStore;
-
-  function renderStoredRequests() {
-    if (!store) return;
-    const requests = store.requests();
-    const counts = [
-      requests.filter((request) => request.status === "pending").length,
-      requests.filter((request) => request.status === "approved" || request.status === "active").length,
-      requests.filter((request) => request.status === "rejected").length,
-      requests.length
+  function render(data) {
+    var stats = data.stats;
+    var cards = [
+      ["Equipment listed", stats.equipment],
+      ["Available items", stats.available],
+      ["Pending requests", stats.pending],
+      ["Units currently borrowed", stats.borrowed],
+      ["Overdue transactions", stats.overdue]
     ];
-    document.querySelectorAll(".stat-number").forEach((el, index) => {
-      el.dataset.count = String(counts[index]);
-      el.textContent = String(counts[index]);
-    });
-    const body = document.querySelector(".panel tbody");
-    const pending = requests.filter((request) => request.status === "pending").slice(0, 5);
-    if (!pending.length) {
-      body.innerHTML = '<tr><td colspan="7" class="portal-muted">No pending requests. New student requests will appear here.</td></tr>';
-      return;
-    }
-    const escape = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (char) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[char]));
-    body.innerHTML = pending.map((request) => {
-      const equipment = request.items.map((item) => item.name + " ×" + item.qty).join(", ");
-      return `<tr><td class="req-id">${escape(request.id)}</td><td><span class="student">${escape(request.studentName)}</span><span class="course">${escape(request.department)}</span></td><td>${escape(equipment)}</td><td>${escape(request.borrow)}</td><td>${escape(request.returnBy)}</td><td><span class="badge">Pending</span></td><td><a href="borrow_requests/borrow_requests.html" class="review-link">Review <span class="arrow">→</span></a></td></tr>`;
+    document.getElementById("dashboard-stats").innerHTML = cards.map(function (card) {
+      return '<div class="portal-stat"><strong>' + admin.escape(card[1]) + '</strong><span>' + admin.escape(card[0]) + "</span></div>";
     }).join("");
-    document.querySelectorAll("tbody tr").forEach((row) => {
-      const link = row.querySelector(".review-link");
-      if (!link) return;
-      row.style.cursor = "pointer";
-      row.addEventListener("click", (event) => {
-        if (!event.target.closest("a")) window.location.href = link.href;
-      });
-    });
-  }
-  renderStoredRequests();
-  window.addEventListener("lablink:data-changed", renderStoredRequests);
-  window.addEventListener("storage", renderStoredRequests);
 
-  /* ---- 1. Count-up on the stat numbers ---- */
-  if (!reduceMotion) {
-    document.querySelectorAll(".stat-number").forEach((el) => {
-      const target = parseInt(el.dataset.count, 10);
-      const duration = 700;
-      const start = performance.now();
-      el.textContent = "0";
-      const tick = (now) => {
-        const p = Math.min((now - start) / duration, 1);
-        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
-        if (p < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    });
+    var pending = admin.filterRows(data.pendingRequests || [], searchQuery, ["id", "studentName", "studentNumber", "purpose", "department"]);
+    document.getElementById("dashboard-pending").innerHTML = pending.length ? pending.map(function (row) {
+      return "<tr><td><a href=\"borrow_requests/borrow_requests.html\">" + admin.escape(row.id) + "</a></td><td>" + admin.escape(row.studentName) +
+        '<br><span class="portal-muted">' + admin.escape(row.studentNumber) + "</span></td><td>" +
+        admin.itemSummary(row.items) + "</td><td>" + admin.formatDate(row.borrow, { month: "short", day: "numeric" }) +
+        " – " + admin.formatDate(row.returnBy, { month: "short", day: "numeric", year: "numeric" }) + "</td></tr>";
+    }).join("") : '<tr><td colspan="4" class="portal-muted">' + (searchQuery ? "No matching requests." : "No pending requests.") + "</td></tr>";
+
+    var returns = admin.filterRows(data.upcomingReturns || [], searchQuery, ["studentName", "studentNumber", "purpose", "id"]);
+    returns.sort(function (a, b) { return String(a.returnBy).localeCompare(String(b.returnBy)); });
+    document.getElementById("dashboard-returns").innerHTML = returns.length ? returns.slice(0, 8).map(function (row) {
+      var isOverdue = row.status === "overdue";
+      return "<tr><td>" + admin.escape(row.studentName) + "</td><td>" + admin.itemSummary(row.items.filter(function (item) { return item.outstanding > 0; }), "outstanding") +
+        "</td><td>" + admin.formatDate(row.returnBy) + '</td><td class="' + (isOverdue ? "dashboard-overdue" : "") + '">' +
+        admin.escape(row.status.replace(/_/g, " ")) + "</td></tr>";
+    }).join("") : '<tr><td colspan="4" class="portal-muted">' + (searchQuery ? "No matching transactions." : "No active borrowing transactions.") + "</td></tr>";
+
+    document.getElementById("dashboard-activity").innerHTML = (data.recentActivity || []).length ? data.recentActivity.map(function (item) {
+      var label = item.equipment ? item.name + " released " + item.equipment : item.name + " submitted a request";
+      return '<li class="portal-list-item"><div><h3>' + admin.escape(label) + '</h3><p>' + admin.escape(item.id) + " · " + admin.escape(item.status) +
+        "</p></div><span class=\"portal-muted\">" + admin.formatDate(item.date) + "</span></li>";
+    }).join("") : '<li class="portal-muted">No request or release activity has been recorded.</li>';
   }
 
-  /* ---- 2. Stat cards: soft spotlight that follows the cursor ---- */
-  document.querySelectorAll(".stat-card").forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.background =
-        `radial-gradient(180px circle at ${e.clientX - r.left}px ${e.clientY - r.top}px, #f0f7fd, #ffffff 70%)`;
+  function load() {
+    admin.api("/api/dashboard").then(render).catch(function (error) {
+      admin.toast(error.message, true);
+      document.getElementById("dashboard-stats").innerHTML = '<div class="portal-note">Dashboard data could not be loaded.</div>';
     });
-    card.addEventListener("mouseleave", () => (card.style.background = ""));
-  });
-
-  /* ---- 3. Table rows: whole row is clickable, hover highlights the link ---- */
-  document.querySelectorAll("tbody tr").forEach((row) => {
-    const link = row.querySelector(".review-link");
-    if (!link) return;
-    row.style.cursor = "pointer";
-    row.addEventListener("click", (e) => {
-      if (!e.target.closest("a")) window.location.href = link.href;
-    });
-    row.addEventListener("mouseenter", () => link.classList.add("is-hot"));
-    row.addEventListener("mouseleave", () => link.classList.remove("is-hot"));
-  });
-
-  /* ---- 4. Ripple on the "View all requests" button ---- */
-  document.querySelectorAll(".btn-outline").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      if (reduceMotion) return;
-      const r = btn.getBoundingClientRect();
-      const size = Math.max(r.width, r.height);
-      const dot = document.createElement("span");
-      dot.className = "ripple";
-      dot.style.width = dot.style.height = size + "px";
-      dot.style.left = e.clientX - r.left - size / 2 + "px";
-      dot.style.top = e.clientY - r.top - size / 2 + "px";
-      btn.appendChild(dot);
-      setTimeout(() => dot.remove(), 600);
-    });
-  });
-
-  /* ---- 5. Avatar dropdown (account settings / sign out) ---- */
-  const avatarBtn = document.getElementById("avatarBtn");
-  const menu = document.getElementById("profileMenu");
-
-  const setMenu = (open) => {
-    menu.classList.toggle("open", open);
-    avatarBtn.setAttribute("aria-expanded", String(open));
-  };
-  avatarBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    setMenu(!menu.classList.contains("open"));
-  });
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#profile")) setMenu(false);
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { setMenu(false); closeSidebar(); }
-  });
-
-  /* ---- 6. Mobile sidebar toggle ---- */
-  const sidebar = document.getElementById("sidebar");
-  const scrim = document.getElementById("scrim");
-  const toggle = document.getElementById("menuToggle");
-
-  function closeSidebar() {
-    sidebar.classList.remove("open");
-    scrim.classList.remove("show");
   }
-  toggle.addEventListener("click", () => {
-    sidebar.classList.add("open");
-    scrim.classList.add("show");
-  });
-  scrim.addEventListener("click", closeSidebar);
-});
+
+  admin.bindSearch(function (query) { searchQuery = query; load(); });
+  document.addEventListener("lablink:admin-refresh", load);
+  load();
+})();

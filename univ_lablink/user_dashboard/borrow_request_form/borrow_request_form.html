@@ -17,7 +17,7 @@
       <div>
         <p class="portal-kicker">Inventory / Borrowing Request</p>
         <h1 id="form-title">Borrowing Request Form</h1>
-        <p>Review your details and selected items before submitting. Requests are saved in this browser demo.</p>
+        <p>Review the equipment and schedule before submitting your request to laboratory staff.</p>
       </div>
     </div>
     <form id="request-form">
@@ -25,9 +25,9 @@
         <h2 id="student-details-title">User Details</h2>
         <p class="portal-muted">Pre-filled from your student account</p>
         <div class="portal-form-grid" style="margin-top:18px">
-          <label class="portal-field"><span class="portal-label">Student name</span><input id="student-name" class="portal-input" required></label>
-          <label class="portal-field"><span class="portal-label">Student number</span><input id="student-number" class="portal-input" required></label>
-          <label class="portal-field"><span class="portal-label">Department</span><input id="department" class="portal-input" required></label>
+          <label class="portal-field"><span class="portal-label">Account name</span><input id="student-name" class="portal-input" readonly></label>
+          <label class="portal-field"><span class="portal-label">User ID</span><input id="student-number" class="portal-input" readonly></label>
+          <label class="portal-field"><span class="portal-label">Department</span><input id="department" class="portal-input" readonly></label>
           <label class="portal-field portal-field--wide"><span class="portal-label">Purpose of borrowing</span><input id="purpose" class="portal-input" placeholder="For example: Chemistry research" required></label>
           <label class="portal-field"><span class="portal-label">Borrow date</span><input id="borrow-date" class="portal-input" type="date" required></label>
           <label class="portal-field"><span class="portal-label">Return date</span><input id="return-date" class="portal-input" type="date" required></label>

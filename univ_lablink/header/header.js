@@ -182,12 +182,24 @@
     panel.id = "msh-notif-panel";
 
     function render() {
-      var requests = [];
-      try {
-        requests = JSON.parse(localStorage.getItem("lablink_requests") || "[]");
-      } catch (error) {
-        console.error("[LabLink notifications] Saved request data is invalid.", error);
-      }
+      fetch("/api/requests", { credentials: "same-origin" })
+        .then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        })
+        .then(function (data) { renderRequests(data.items || []); })
+        .catch(function (error) {
+          console.error("[LabLink notifications] Could not load request updates.", error);
+          list.textContent = "";
+          var item = document.createElement("li");
+          item.textContent = "Request updates could not be loaded.";
+          list.appendChild(item);
+          empty.hidden = true;
+          list.hidden = false;
+        });
+    }
+
+    function renderRequests(requests) {
       var labels = { pending: "is pending approval", approved: "was approved", rejected: "was declined", active: "is currently borrowed", return_requested: "has a return awaiting inspection", returned: "was returned" };
       list.textContent = "";
       requests.slice(0, 5).forEach(function (request) {
@@ -195,7 +207,7 @@
         var title = document.createElement("strong");
         var detail = document.createElement("span");
         title.textContent = request.id || "Borrow request";
-        detail.textContent = "Your request " + (labels[request.status] || "was updated");
+        detail.textContent = "Your request " + request.id + " " + (labels[request.status] || "is " + String(request.status || "updated").replace(/_/g, " "));
         item.appendChild(title);
         item.appendChild(detail);
         list.appendChild(item);
@@ -224,7 +236,6 @@
       }
     });
     window.addEventListener("lablink:data-changed", render);
-    window.addEventListener("storage", render);
   }
 
   /* ---------- Paths & active link ---------- */

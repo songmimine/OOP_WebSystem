@@ -5,9 +5,8 @@
   var empty = document.getElementById("return-empty");
   var modal = document.getElementById("extension-modal");
   var toast = document.getElementById("portal-toast");
-  var selectedId = null;
+  var selected = null;
   var timer;
-  var labels = { approved: "Approved · ready for pickup", active: "Borrowed", return_requested: "Awaiting staff inspection" };
 
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
@@ -19,67 +18,77 @@
     toast.classList.toggle("portal-toast--error", !!error);
     toast.hidden = false;
     window.clearTimeout(timer);
-    timer = window.setTimeout(function () { toast.hidden = true; }, 2800);
+    timer = window.setTimeout(function () { toast.hidden = true; }, 3000);
+  }
+  function label(status) {
+    return { active: "Borrowed", overdue: "Overdue", return_requested: "Return submitted · Awaiting staff inspection", partially_returned: "Partially returned" }[status] || status.replace(/_/g, " ");
   }
   function render() {
     var requests = store.requests().filter(function (request) {
-      return ["approved", "active", "return_requested"].indexOf(request.status) !== -1;
+      return request.transactionId && ["active", "overdue", "return_requested", "partially_returned"].indexOf(request.status) !== -1;
     });
     list.innerHTML = requests.map(function (request) {
+      var outstanding = request.items.filter(function (item) { return item.outstanding > 0; });
       var actions = "";
-      if (request.status === "approved") {
-        actions = '<button class="portal-button portal-button--small portal-button--blue" type="button" data-pickup="' + esc(request.id) + '">Confirm pickup</button>';
-      } else if (request.status === "active") {
-        actions = '<button class="portal-button portal-button--small portal-button--secondary" type="button" data-extension="' + esc(request.id) + '">Request extension</button>' +
-          '<button class="portal-button portal-button--small" type="button" data-return="' + esc(request.id) + '">Request return</button>';
+      if (request.status !== "return_requested" && outstanding.length) {
+        actions += '<button class="portal-button portal-button--small portal-button--secondary" type="button" data-return="' + esc(request.transactionId) + '">Submit return</button>';
+      } else if (request.status === "return_requested") {
+        actions += '<span class="portal-pill portal-pill--pending">Waiting for staff inspection</span>';
       }
-      var details = request.items.map(function (item) { return item.qty + " × " + item.name; }).join(", ");
-      var returnDate = request.extensionStatus === "approved" ? request.extensionDate : request.returnBy;
-      var extensionNote = request.extensionStatus === "pending" ? " · Extension awaiting staff approval" :
-        request.extensionStatus === "approved" ? " · Extension approved" : "";
-      return '<article class="portal-card portal-list-item"><div><p class="portal-kicker">' + esc(request.id) + '</p><h3>' + esc(request.purpose || "Equipment borrowing") +
-        '</h3><p>' + esc(details) + '</p><p>Return by: ' + esc(returnDate) + esc(extensionNote) + (request.extensionReason ? " · " + esc(request.extensionReason) : "") + '</p></div>' +
-        '<div class="portal-actions"><span class="portal-pill ' + (request.status === "return_requested" ? "portal-pill--pending" : "") + '">' + (labels[request.status] || esc(request.status)) + "</span>" + actions + "</div></article>";
+      if (outstanding.length && !request.extensionId) {
+        actions += '<button class="portal-button portal-button--small" type="button" data-extension="' + esc(request.transactionId) + '">Request extension</button>';
+      } else if (request.extensionStatus === "pending") {
+        actions += '<span class="portal-pill portal-pill--pending">Extension awaiting staff review</span>';
+      } else if (request.extensionStatus === "approved") {
+        actions += '<span class="portal-pill">Extension approved</span>';
+      } else if (request.extensionStatus === "rejected") {
+        actions += '<span class="portal-pill portal-pill--rejected">Extension rejected</span>';
+      }
+      return '<article class="portal-card portal-list-item"><div><p class="portal-kicker">' + esc(request.transactionId) + ' · ' + esc(request.id) +
+        '</p><h3>' + esc(request.purpose || "Equipment borrowing") + '</h3><p>' + outstanding.map(function (item) { return esc(item.outstanding + " × " + item.name); }).join(", ") +
+        '</p><p>Released: ' + esc(request.releaseDate || "") + ' · Return deadline: <strong>' + esc(request.returnBy || "") + "</strong></p>" +
+        (request.extensionReason ? '<p>Extension reason: ' + esc(request.extensionReason) + "</p>" : "") + '</div><div class="portal-actions"><span class="portal-pill ' +
+        (request.status === "overdue" ? "portal-pill--rejected" : "") + '">' + esc(label(request.status)) + "</span>" + actions + "</div></article>";
     }).join("");
     empty.hidden = requests.length > 0;
   }
+
   list.addEventListener("click", function (event) {
-    var pickup = event.target.closest("[data-pickup]");
     var returnButton = event.target.closest("[data-return]");
-    var extension = event.target.closest("[data-extension]");
-    try {
-      if (pickup) {
-        store.setStatus(pickup.getAttribute("data-pickup"), "active");
-        notify("Pickup confirmed. Your equipment is now marked as borrowed.");
-      } else if (returnButton) {
-        var request = store.getRequest(returnButton.getAttribute("data-return"));
-        request.status = "return_requested";
-        store.saveRequest(request);
-        notify("Return request sent to the laboratory staff.");
-      } else if (extension) {
-        selectedId = extension.getAttribute("data-extension");
-        document.getElementById("extension-date").value = store.getRequest(selectedId).returnBy;
-        document.getElementById("extension-modal").hidden = false;
-      }
-    } catch (error) { notify(error.message, true); }
+    var extensionButton = event.target.closest("[data-extension]");
+    if (returnButton) {
+      if (!window.confirm("Submit this equipment for return inspection? Staff must physically inspect and confirm it.")) return;
+      returnButton.disabled = true;
+      store.requestReturn(returnButton.dataset.return).then(function () {
+        notify("Return submitted. The borrowing remains active until laboratory staff confirms inspection.");
+      }).catch(function (error) { notify(error.message, true); returnButton.disabled = false; });
+    }
+    if (extensionButton) {
+      selected = store.requests().find(function (request) { return request.transactionId === extensionButton.dataset.extension; });
+      if (!selected) return notify("Borrowing transaction was not found.", true);
+      document.getElementById("extension-date").value = "";
+      document.getElementById("extension-date").min = selected.returnBy.slice(0, 10);
+      document.getElementById("extension-reason").value = "";
+      modal.hidden = false;
+    }
   });
   document.getElementById("extension-cancel").addEventListener("click", function () { modal.hidden = true; });
   document.getElementById("extension-submit").addEventListener("click", function () {
     var reason = document.getElementById("extension-reason").value.trim();
     var date = document.getElementById("extension-date").value;
-    if (!reason || !date) return notify("Enter a reason and proposed return date.", true);
-    try {
-      var request = store.getRequest(selectedId);
-      if (!request || date <= request.returnBy) return notify("Choose a date later than the current return date.", true);
-      request.extensionReason = reason;
-      request.extensionDate = date;
-      request.extensionStatus = "pending";
-      store.saveRequest(request);
+    if (!selected || !reason || !date) return notify("Enter a reason and proposed return date.", true);
+    var button = document.getElementById("extension-submit");
+    button.disabled = true;
+    store.api("/api/transactions/" + encodeURIComponent(selected.transactionId) + "/extensions", {
+      method: "POST",
+      body: { reason: reason, newDueDate: date }
+    }).then(function () {
+      return store.refresh();
+    }).then(function () {
       modal.hidden = true;
-      document.getElementById("extension-reason").value = "";
-      notify("Extension request sent for staff approval.");
-    } catch (error) { notify(error.message, true); }
+      notify("Extension request sent to laboratory staff for approval.");
+    }).catch(function (error) { notify(error.message, true); }).finally(function () { button.disabled = false; });
   });
   window.addEventListener("lablink:data-changed", render);
-  render();
+  store.ready.then(render).catch(function (error) { notify(error.message, true); });
 })();
