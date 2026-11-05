@@ -1,23 +1,37 @@
 (function () {
   "use strict";
+  var store = window.LabLinkStore;
   var form = document.getElementById("profile-form");
   var status = document.getElementById("profile-status");
-  var user = {};
-  try { user = JSON.parse(localStorage.getItem("lablink_user") || "{}"); } catch (error) { user = {}; }
-  document.getElementById("profile-name").value = user.name || "Katrina Mendoza";
-  document.getElementById("profile-id").value = user.id || "2025-2-00001";
-  document.getElementById("profile-department").value = user.department || "Computer Science";
-  document.getElementById("profile-email").value = user.email || "";
+  store.api("/api/me").then(function (user) {
+    document.getElementById("profile-name").value = user.name || "";
+    document.getElementById("profile-id").value = user.id || "";
+    document.getElementById("profile-department").value = user.department || "";
+    document.getElementById("profile-email").value = user.email || "";
+  }).catch(function (error) {
+    status.textContent = error.message;
+    status.hidden = false;
+  });
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    user.name = document.getElementById("profile-name").value.trim();
-    user.id = document.getElementById("profile-id").value.trim();
-    user.department = document.getElementById("profile-department").value.trim();
-    user.email = document.getElementById("profile-email").value.trim();
-    user.role = user.role || "User";
-    localStorage.setItem("lablink_user", JSON.stringify(user));
-    status.textContent = "Profile saved in this browser.";
-    status.hidden = false;
-    if (window.LabLinkHeader) window.LabLinkHeader.setUser(user.name, user.role);
+    var button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    store.api("/api/me", {
+      method: "PUT",
+      body: {
+        name: document.getElementById("profile-name").value.trim(),
+        department: document.getElementById("profile-department").value.trim(),
+        email: document.getElementById("profile-email").value.trim()
+      }
+    }).then(function (user) {
+      status.textContent = "Profile changes saved to your account.";
+      status.hidden = false;
+      window.dispatchEvent(new CustomEvent("lablink:data-changed"));
+      if (window.LabLinkHeader) window.LabLinkHeader.setUser(user.name, "University User");
+    }).catch(function (error) {
+      status.textContent = error.message;
+      status.hidden = false;
+      status.classList.add("portal-toast--error");
+    }).finally(function () { button.disabled = false; });
   });
 })();

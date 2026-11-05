@@ -1,0 +1,13 @@
+.return-table { min-width: 930px; }
+.return-actions { display: flex; gap: 6px; flex-wrap: wrap; min-width: 140px; }
+.inspection-dialog, .case-dialog { width: min(760px, calc(100vw - 28px)); max-height: min(86vh, 850px); overflow: auto; border: 0; }
+.inspection-dialog::backdrop, .case-dialog::backdrop { background: rgba(15,29,52,.52); }
+.inspection-item { display: grid; grid-template-columns: minmax(140px, 1fr) 100px minmax(150px, 170px) minmax(160px, 1fr); align-items: end; gap: 10px; padding: 14px 0; border-bottom: 1px solid #e2e8f0; }
+.inspection-item h3 { margin: 0; font-size: 14px; }
+.inspection-item p { margin: 4px 0 0; color: #69758a; font-size: 12px; }
+.inspection-item .portal-label { font-size: 11px; }
+.inspection-dialog form > .portal-button { margin-top: 18px; }
+.case-dialog form { margin-top: 18px; }
+@media (max-width: 700px) {
+  .inspection-item { grid-template-columns: 1fr 100px; }
+}

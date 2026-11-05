@@ -1,0 +1,7 @@
+.report-summary { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
+.report-toolbar { display: grid; grid-template-columns: minmax(170px, .7fr) minmax(160px, .7fr) minmax(220px, 1.4fr) auto; align-items: end; gap: 12px; margin-bottom: 20px; }
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.report-table { min-width: 860px; }
+.report-empty { padding: 18px; color: #69758a; }
+@media (max-width: 900px) { .report-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .report-toolbar { grid-template-columns: 1fr; } }

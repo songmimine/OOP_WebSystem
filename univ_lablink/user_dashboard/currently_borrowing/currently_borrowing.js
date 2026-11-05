@@ -19,5 +19,8 @@
     empty.hidden = requests.length > 0;
   }
   window.addEventListener("lablink:data-changed", render);
-  render();
+  store.ready.then(render).catch(function (error) {
+    empty.hidden = false;
+    empty.querySelector("p").textContent = error.message;
+  });
 })();

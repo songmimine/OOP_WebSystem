@@ -38,7 +38,7 @@
     fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: id, password: password })
+      body: JSON.stringify({ id: id, password: password, remember: form.querySelector('input[name="remember"]').checked })
     })
       .then(function (res) {
         return res.json().then(function (data) { return { ok: res.ok, data: data }; });
@@ -50,24 +50,6 @@
           pwInput.focus();
           return;
         }
-
-        // Keep the dashboard user details available while respecting the session checkbox.
-        try {
-          var sessionValue = JSON.stringify({ role: result.data.role });
-          var remember = form.querySelector('input[name="remember"]').checked;
-          if (remember) {
-            localStorage.setItem("lablink_session", sessionValue);
-            sessionStorage.removeItem("lablink_session");
-          } else {
-            sessionStorage.setItem("lablink_session", sessionValue);
-            localStorage.removeItem("lablink_session");
-          }
-          localStorage.setItem("lablink_user", JSON.stringify({
-            name: result.data.name,
-            id: id,
-            role: result.data.role === "admin" ? "Laboratory Staff" : "User"
-          }));
-        } catch (e) { /* storage unavailable */ }
 
         clearError();
         window.location.href = result.data.redirect; // admin -> admin side, user -> user side

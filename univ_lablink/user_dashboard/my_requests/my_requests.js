@@ -12,6 +12,8 @@
     pending:  "Pending Approval",
     approved: "Approved",
     active:   "Borrowed",
+    overdue:  "Overdue",
+    partially_returned: "Partially Returned",
     return_requested: "Return Requested",
     returned: "Returned",
     rejected: "Rejected"
@@ -23,6 +25,7 @@
   };
 
   var FORM_PAGE = "../borrow_request_form/borrow_request_form.html";
+  var store = window.LabLinkStore;
 
   // ---------- State ----------
   var state = {
@@ -99,7 +102,8 @@
             escapeHtml(req.returnTime || "5:00 PM") + "</p>" +
         "</div>" +
         '<a class="mr-card__form-btn" href="' + escapeHtml(formUrl) + '">View Borrow<br>Request Form</a>' +
-        '<span class="mr-badge mr-badge--' + status + '">' + STATUS_LABELS[status] + "</span>" +
+          (status === "pending" ? '<button class="mr-card__form-btn" type="button" data-cancel="' + escapeHtml(req.id) + '">Cancel request</button>' : "") +
+          '<span class="mr-badge mr-badge--' + status + '">' + STATUS_LABELS[status] + "</span>" +
       "</li>"
     );
   }
@@ -153,6 +157,16 @@
       var active = pill.getAttribute("data-filter") === filter;
       pill.classList.toggle("is-active", active);
       pill.setAttribute("aria-pressed", String(active));
+    });
+
+    elList.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-cancel]");
+      if (!button || !window.confirm("Cancel this pending borrowing request?")) return;
+      button.disabled = true;
+      store.setStatus(button.dataset.cancel, "cancelled").then(refresh).catch(function (error) {
+        button.disabled = false;
+        window.alert(error.message);
+      });
     });
     render();
   }
@@ -242,5 +256,8 @@
   window.MyRequests = { refresh: refresh };
 
   // ---------- Start ----------
-  refresh();
+  store.ready.then(refresh).catch(function (error) {
+    elEmpty.hidden = false;
+    elEmpty.querySelector(".mr-empty__text").textContent = error.message;
+  });
 })();
