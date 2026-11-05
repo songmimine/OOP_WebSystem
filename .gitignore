@@ -1,5 +1,5 @@
 __pycache__/
 *.py[cod]
-instance/
+.env
 univ_lablink/uploads/*
 !univ_lablink/uploads/.gitkeep

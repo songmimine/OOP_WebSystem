@@ -2,19 +2,31 @@
 
 import csv
 import io
+import logging
 import os
 import secrets
-import sqlite3
 import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory, session
-from werkzeug.security import check_password_hash
+import mysql.connector
 from werkzeug.utils import secure_filename
 
-from univ_lablink.database import DATABASE, initialize
+from config import SECRET_KEY
+from univ_lablink.classes import (
+    Account,
+    BorrowingRequest,
+    BorrowingTransaction,
+    Equipment,
+    LaboratoryStaff,
+    OtherCases,
+    User,
+)
+from univ_lablink.database import connect
+
+logging.basicConfig(level=logging.INFO)
 
 BASE = Path(__file__).parent / "univ_lablink"
 UPLOADS = BASE / "uploads"
@@ -22,68 +34,17 @@ UPLOADS.mkdir(exist_ok=True)
 
 app = Flask(__name__, static_folder=str(BASE), static_url_path="")
 app.config.update(
-    SECRET_KEY=os.environ.get("LABLINK_SECRET_KEY") or secrets.token_hex(32),
-    DATABASE=str(DATABASE),
+    SECRET_KEY=SECRET_KEY or secrets.token_hex(32),
     MAX_CONTENT_LENGTH=5 * 1024 * 1024,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(days=30),
 )
-initialize(app.config["DATABASE"])
-
-
-class Account:
-    def __init__(self, account_id, name, role):
-        self.id = account_id
-        self.name = name
-        self.role = role
-
-    def display_dashboard(self):
-        return "index.html"
-
-
-class User(Account):
-    def display_dashboard(self):
-        return "user_welcome/user_welcome.html"
-
-
-class LaboratoryStaff(Account):
-    def display_dashboard(self):
-        return "admin_welcome/admin_welcome.html"
-
-
-class Equipment:
-    def __init__(self, equipment_id, name, available_quantity):
-        self.id = equipment_id
-        self.name = name
-        self.available_quantity = available_quantity
-
-
-class BorrowingRequest:
-    def __init__(self, request_id, account_id, status):
-        self.id = request_id
-        self.account_id = account_id
-        self.status = status
-
-
-class BorrowingTransaction:
-    def __init__(self, transaction_id, account_id, status):
-        self.id = transaction_id
-        self.account_id = account_id
-        self.status = status
-
-
-class OtherCases:
-    CASE_TYPES = {"Damaged", "Lost", "Overdue", "Improper Return"}
 
 
 def db():
     if "database" not in g:
-        connection = sqlite3.connect(app.config["DATABASE"], timeout=10)
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA busy_timeout = 10000")
-        g.database = connection
+        g.database = connect()
     return g.database
 
 
@@ -98,13 +59,23 @@ def api_error(message, status=400):
     return jsonify(ok=False, message=message), status
 
 
+@app.errorhandler(mysql.connector.Error)
+def handle_database_error(error):
+    logging.exception("MySQL operation failed")
+    return api_error("The database operation could not be completed. Check the Flask server log.", 500)
+
+
 def require_role(*roles):
     def decorator(handler):
         @wraps(handler)
         def guarded(*args, **kwargs):
             if not session.get("account_id"):
                 return api_error("Please sign in to continue.", 401)
-            if roles and session.get("role") not in roles:
+            account = account_from_session()
+            if not account:
+                return api_error("Your account is unavailable. Please sign in again.", 401)
+            session["role"] = account.role
+            if roles and account.role not in roles:
                 return api_error("You do not have permission to perform this action.", 403)
             return handler(*args, **kwargs)
         return guarded
@@ -124,13 +95,16 @@ def account_from_session():
     if not row:
         session.clear()
         return None
+    if row["role_id"] not in ("user", "laboratory_staff"):
+        session.clear()
+        return None
     role = "laboratory_staff" if row["role_id"] == "laboratory_staff" else "user"
     cls = LaboratoryStaff if role == "laboratory_staff" else User
     return cls(row["account_id"], row["full_name"], role)
 
 
 def iso_now():
-    return datetime.now().astimezone().isoformat(timespec="seconds")
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def valid_date(value, label):
@@ -140,7 +114,7 @@ def valid_date(value, label):
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
         raise ValueError(label + " must be a valid date and time.") from exc
-    return parsed.isoformat(timespec="seconds") if "T" in value else parsed.date().isoformat()
+    return parsed.strftime("%Y-%m-%d %H:%M:%S") if "T" in value or " " in value else parsed.date().isoformat()
 
 
 def new_id(prefix):
@@ -167,6 +141,7 @@ def equipment_rows(include_inactive=False):
             "detail": row["description"],
             "description": row["description"],
             "category": row["category_name"],
+            "categoryId": row["category_id"],
             "location": row["location"],
             "unit": row["unit"],
             "stock": row["available_quantity"],
@@ -184,11 +159,7 @@ def equipment_rows(include_inactive=False):
 
 
 def request_rows(account_id=None):
-    db().execute(
-        """UPDATE borrowing_transactions SET transaction_status = 'Overdue'
-           WHERE transaction_status = 'Active' AND return_deadline < ? AND return_requested_at IS NULL""",
-        (iso_now(),),
-    )
+    BorrowingTransaction.check_overdue(db())
     sql = """SELECT br.*, a.full_name, a.department, a.university_email, a.account_id,
                     bt.transaction_id, bt.release_datetime, bt.return_deadline,
                     bt.transaction_status, bt.return_requested_at, bt.actual_return_datetime,
@@ -296,8 +267,10 @@ def guard_pages():
     first_segment = request.path.strip("/").split("/")[0]
     required_role = {"admin_dashboard": "laboratory_staff", "admin_welcome": "laboratory_staff",
                      "user_dashboard": "user", "user_welcome": "user"}.get(first_segment)
-    if required_role and session.get("role") != required_role:
-        return redirect("/index.html")
+    if required_role:
+        account = account_from_session() if session.get("account_id") else None
+        if not account or account.role != required_role:
+            return redirect("/index.html")
 
 
 @app.route("/")
@@ -306,36 +279,34 @@ def home():
 
 
 @app.post("/api/login")
+@app.post("/api/auth/login")
 def login():
+    session.clear()
     data = json_body()
     account_id = str(data.get("id", "")).strip().upper()
     password = str(data.get("password", ""))
     if not account_id or not password:
         return api_error("Please enter your User ID and password.")
-    row = db().execute(
-        """SELECT a.account_id, a.full_name, a.department, a.university_email, a.password_hash, a.role_id
-           FROM accounts a WHERE a.account_id = ? AND a.account_status = 'Active'""",
-        (account_id,),
-    ).fetchone()
-    if not row or not check_password_hash(row["password_hash"], password):
+    account = Account.authenticate(db(), account_id, password)
+    if not account:
         return api_error("Invalid User ID or password.", 401)
     session.clear()
-    session["account_id"] = row["account_id"]
-    session["role"] = row["role_id"]
+    session["account_id"] = account.id
+    session["role"] = account.role
     session.permanent = bool(data.get("remember"))
-    account = LaboratoryStaff(row["account_id"], row["full_name"], row["role_id"]) if row["role_id"] == "laboratory_staff" else User(row["account_id"], row["full_name"], row["role_id"])
     return jsonify(
         ok=True,
-        id=row["account_id"],
-        role="admin" if row["role_id"] == "laboratory_staff" else "user",
-        name=row["full_name"],
-        department=row["department"],
-        email=row["university_email"],
+        id=account.id,
+        role="admin" if account.role == "laboratory_staff" else "user",
+        name=account.name,
+        department=account.department,
+        email=account.email,
         redirect=account.display_dashboard(),
     )
 
 
 @app.get("/api/me")
+@app.get("/api/auth/me")
 @require_role("user", "laboratory_staff")
 def me():
     account = account_from_session()
@@ -360,13 +331,15 @@ def update_me():
         return api_error("Enter a valid name, email address, and department.")
     if email and ("@" not in email or "." not in email.rsplit("@", 1)[-1]):
         return api_error("Enter a valid university email address.")
+    if not email:
+        return api_error("Enter a valid university email address.")
     try:
         db().execute(
             "UPDATE accounts SET full_name = ?, university_email = ?, department = ? WHERE account_id = ?",
             (name, email, department, session["account_id"]),
         )
         db().commit()
-    except sqlite3.IntegrityError:
+    except mysql.connector.IntegrityError:
         db().rollback()
         return api_error("That email address is already associated with another account.")
     return me()
@@ -378,10 +351,36 @@ def logout():
     return redirect("/index.html")
 
 
+@app.post("/api/auth/logout")
+def api_logout():
+    session.clear()
+    return jsonify(ok=True)
+
+
 @app.get("/api/equipment")
 @require_role("user", "laboratory_staff")
 def list_equipment():
-    return jsonify(items=equipment_rows(include_inactive=session.get("role") == "laboratory_staff"))
+    items = equipment_rows(include_inactive=session.get("role") == "laboratory_staff")
+    search = request.args.get("search", "").strip().casefold()
+    category = request.args.get("category", "").strip().casefold()
+    if search:
+        items = [item for item in items if search in item["name"].casefold()]
+    if category:
+        items = [
+            item for item in items
+            if category == item["category"].casefold() or category == str(item["categoryId"])
+        ]
+    return jsonify(items=items)
+
+
+@app.get("/api/equipment/<equipment_id>")
+@require_role("user", "laboratory_staff")
+def get_equipment(equipment_id):
+    item = next((row for row in equipment_rows(session.get("role") == "laboratory_staff")
+                 if row["id"] == equipment_id), None)
+    if not item:
+        return api_error("Equipment was not found.", 404)
+    return jsonify(item=item)
 
 
 def save_uploaded_image():
@@ -416,32 +415,37 @@ def create_equipment():
         borrow_status = str(data.get("borrowStatus", "Available")).strip()
         if borrow_status not in ("Available", "Unavailable"):
             raise ValueError("Borrow status must be Available or Unavailable.")
-        if not name or not category or quantity < 0:
+        detail = str(data.get("detail", data.get("description", ""))).strip()
+        location = str(data.get("location", "")).strip()
+        unit = str(data.get("unit", "units")).strip() or "units"
+        if not name or len(name) > 160 or not category or len(category) > 120 or quantity < 0:
             raise ValueError("Enter an equipment name, category, and a non-negative quantity.")
+        if len(location) > 160 or len(unit) > 40:
+            raise ValueError("Location or unit exceeds the maximum supported length.")
         image = save_uploaded_image()
-        connection = db()
-        connection.execute("INSERT OR IGNORE INTO equipment_categories (category_name) VALUES (?)", (category,))
-        category_id = connection.execute(
-            "SELECT category_id FROM equipment_categories WHERE category_name = ?", (category,)
-        ).fetchone()["category_id"]
         equipment_id = new_id("EQ")
-        connection.execute(
-            """INSERT INTO equipment
-               (equipment_id, category_id, equipment_name, description, location, unit,
-                total_quantity, available_quantity, borrow_status, image_path)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (equipment_id, category_id, name, str(data.get("detail", data.get("description", ""))).strip(),
-             str(data.get("location", "")).strip(), str(data.get("unit", "units")).strip() or "units",
-             quantity, quantity, borrow_status, image),
+        connection = db()
+        account_from_session().add_equipment(
+            connection,
+            equipment_id,
+            category,
+            name,
+            detail,
+            location,
+            unit,
+            quantity,
+            borrow_status,
+            image,
         )
         connection.commit()
         return jsonify(ok=True, item=next(item for item in equipment_rows(True) if item["id"] == equipment_id)), 201
-    except (ValueError, sqlite3.IntegrityError) as exc:
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         db().rollback()
         return api_error(str(exc))
 
 
 @app.patch("/api/equipment/<equipment_id>")
+@app.put("/api/equipment/<equipment_id>")
 @require_role("laboratory_staff")
 def update_equipment(equipment_id):
     data = request.form if request.form else json_body()
@@ -459,22 +463,29 @@ def update_equipment(equipment_id):
         if borrow_status not in ("Available", "Unavailable"):
             raise ValueError("Borrow status must be Available or Unavailable.")
         borrowed = existing["total_quantity"] - existing["available_quantity"]
-        if not name or not category or total < borrowed:
+        if not name or len(name) > 160 or not category or len(category) > 120 or total < borrowed:
             raise ValueError("Total quantity cannot be lower than units currently borrowed or unavailable.")
+        if len(location) > 160 or len(unit) > 40:
+            raise ValueError("Location or unit exceeds the maximum supported length.")
         image = save_uploaded_image() or existing["image_path"]
-        connection.execute("INSERT OR IGNORE INTO equipment_categories (category_name) VALUES (?)", (category,))
-        category_id = connection.execute("SELECT category_id FROM equipment_categories WHERE category_name = ?", (category,)).fetchone()["category_id"]
         available = max(0, existing["available_quantity"] + total - existing["total_quantity"])
-        connection.execute(
-            """UPDATE equipment SET category_id = ?, equipment_name = ?, description = ?, location = ?,
-               unit = ?, total_quantity = ?, available_quantity = ?, borrow_status = ?, equipment_status = ?, image_path = ?,
-               last_updated = ? WHERE equipment_id = ?""",
-            (category_id, name, detail, location, unit, total, available, borrow_status,
-             "Active" if active else "Inactive", image, iso_now(), equipment_id),
+        account_from_session().update_equipment(
+            connection,
+            equipment_id,
+            category,
+            name,
+            detail,
+            location,
+            unit,
+            total,
+            available,
+            borrow_status,
+            "Active" if active else "Inactive",
+            image,
         )
         connection.commit()
         return jsonify(ok=True, item=next(item for item in equipment_rows(True) if item["id"] == equipment_id))
-    except (ValueError, sqlite3.IntegrityError) as exc:
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         connection.rollback()
         return api_error(str(exc))
 
@@ -490,11 +501,109 @@ def deactivate_equipment(equipment_id):
     return jsonify(ok=True)
 
 
+@app.get("/api/categories")
+@require_role("user", "laboratory_staff")
+def list_categories():
+    rows = db().execute(
+        "SELECT category_id, category_name, category_description FROM equipment_categories ORDER BY category_name"
+    ).fetchall()
+    return jsonify(items=[
+        {"id": row["category_id"], "name": row["category_name"], "description": row["category_description"] or ""}
+        for row in rows
+    ])
+
+
+@app.post("/api/categories")
+@require_role("laboratory_staff")
+def create_category():
+    data = json_body()
+    name = str(data.get("name", "")).strip()
+    description = str(data.get("description", "")).strip()
+    if not name or len(name) > 120:
+        return api_error("Enter a category name up to 120 characters.")
+    try:
+        connection = db()
+        connection.execute(
+            "INSERT INTO equipment_categories (category_name, category_description) VALUES (?, ?)",
+            (name, description),
+        )
+        category_id = connection.execute("SELECT LAST_INSERT_ID() AS category_id").fetchone()["category_id"]
+        connection.commit()
+        return jsonify(ok=True, item={"id": category_id, "name": name, "description": description}), 201
+    except mysql.connector.IntegrityError:
+        db().rollback()
+        return api_error("A category with that name already exists.")
+
+
+@app.put("/api/categories/<int:category_id>")
+@app.patch("/api/categories/<int:category_id>")
+@require_role("laboratory_staff")
+def update_category(category_id):
+    data = json_body()
+    name = str(data.get("name", "")).strip()
+    description = str(data.get("description", "")).strip()
+    if not name or len(name) > 120:
+        return api_error("Enter a category name up to 120 characters.")
+    try:
+        connection = db()
+        if not connection.execute(
+            "SELECT 1 FROM equipment_categories WHERE category_id = ?",
+            (category_id,),
+        ).fetchone():
+            return api_error("Category was not found.", 404)
+        cursor = connection.execute(
+            "UPDATE equipment_categories SET category_name = ?, category_description = ? WHERE category_id = ?",
+            (name, description, category_id),
+        )
+        connection.commit()
+        return jsonify(ok=True, item={"id": category_id, "name": name, "description": description})
+    except mysql.connector.IntegrityError:
+        db().rollback()
+        return api_error("A category with that name already exists.")
+
+
+@app.delete("/api/categories/<int:category_id>")
+@require_role("laboratory_staff")
+def delete_category(category_id):
+    connection = db()
+    try:
+        cursor = connection.execute("DELETE FROM equipment_categories WHERE category_id = ?", (category_id,))
+        if cursor.rowcount != 1:
+            return api_error("Category was not found.", 404)
+        connection.commit()
+        return jsonify(ok=True)
+    except mysql.connector.IntegrityError:
+        connection.rollback()
+        return api_error("A category assigned to equipment cannot be deleted.")
+
+
 @app.get("/api/requests")
 @require_role("user", "laboratory_staff")
 def list_requests():
     account_id = None if session["role"] == "laboratory_staff" else session["account_id"]
     return jsonify(items=request_rows(account_id))
+
+
+@app.get("/api/staff/requests")
+@require_role("laboratory_staff")
+def staff_requests():
+    return jsonify(items=request_rows())
+
+
+@app.get("/api/requests/mine")
+@require_role("user")
+def list_my_requests():
+    return jsonify(items=request_rows(session["account_id"]))
+
+
+@app.get("/api/requests/<request_id>")
+@require_role("user", "laboratory_staff")
+def get_request(request_id):
+    account_id = None if session["role"] == "laboratory_staff" else session["account_id"]
+    row = next((item for item in request_rows(account_id) if item["id"] == request_id), None)
+    if not row:
+        return api_error("Request was not found.", 404)
+    return jsonify(request=row)
 
 
 @app.post("/api/requests")
@@ -503,36 +612,20 @@ def create_request():
     data = json_body()
     try:
         purpose = str(data.get("purpose", "")).strip()
+        notes = str(data.get("notes", "")).strip()
         borrowed = valid_date(data.get("borrow"), "Borrow date")
         due = valid_date(data.get("returnBy"), "Return date")
-        if not purpose or due < borrowed:
+        if not purpose or len(purpose) > 500 or len(notes) > 2000:
+            raise ValueError("Enter a purpose up to 500 characters and notes up to 2,000 characters.")
+        if datetime.fromisoformat(due) < datetime.fromisoformat(borrowed):
             raise ValueError("Enter a purpose and a return date on or after the borrowing date.")
         items = data.get("items")
-        if not isinstance(items, list) or not items:
-            raise ValueError("Add at least one equipment item to your request.")
         connection = db()
-        request_id = new_id("REQ")
-        with connection:
-            for item in items:
-                equipment_id = str(item.get("id", ""))
-                quantity = validate_quantity(item.get("qty"))
-                equipment = require_existing_equipment(equipment_id)
-                if (equipment["equipment_status"] != "Active" or equipment["borrow_status"] != "Available"
-                        or equipment["available_quantity"] < quantity):
-                    raise ValueError(f"Not enough available stock for {equipment['equipment_name']}.")
-            connection.execute(
-                """INSERT INTO borrowing_requests
-                   (request_id, account_id, purpose, notes, requested_borrowing_datetime, requested_return_datetime)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
-                (request_id, session["account_id"], purpose, str(data.get("notes", "")).strip(), borrowed, due),
-            )
-            for item in items:
-                connection.execute(
-                    "INSERT INTO borrowing_request_items (request_id, equipment_id, requested_quantity) VALUES (?, ?, ?)",
-                    (request_id, str(item["id"]), validate_quantity(item.get("qty"))),
-                )
+        request_id = User(session["account_id"], "", "user").submit_borrowing_request(
+            connection, purpose, notes, borrowed, due, items
+        )
         return jsonify(ok=True, request=next(row for row in request_rows(session["account_id"]) if row["id"] == request_id)), 201
-    except (ValueError, sqlite3.IntegrityError) as exc:
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         db().rollback()
         return api_error(str(exc))
 
@@ -548,75 +641,87 @@ def update_request(request_id):
     action = str(data.get("status", "")).lower()
     try:
         if session["role"] == "laboratory_staff":
-            if row["request_status"] != "Pending" or action not in ("approved", "rejected"):
-                raise ValueError("Only pending requests can be approved or rejected.")
+            staff = account_from_session()
             if action == "approved":
-                for item in connection.execute(
-                    "SELECT e.equipment_name, e.available_quantity, e.borrow_status, ri.requested_quantity FROM borrowing_request_items ri JOIN equipment e USING (equipment_id) WHERE ri.request_id = ?",
-                    (request_id,),
-                ).fetchall():
-                    if item["borrow_status"] != "Available" or item["available_quantity"] < item["requested_quantity"]:
-                        raise ValueError(f"Not enough available stock for {item['equipment_name']}.")
-            connection.execute(
-                """UPDATE borrowing_requests SET request_status = ?, reviewed_by = ?, reviewed_at = ?,
-                   review_notes = ?, is_new = 0 WHERE request_id = ?""",
-                (action.capitalize(), session["account_id"], iso_now(), str(data.get("reviewNotes", "")).strip(), request_id),
-            )
+                staff.approve_request(connection, request_id, str(data.get("reviewNotes", "")).strip())
+            elif action == "rejected":
+                staff.reject_request(connection, request_id, str(data.get("reviewNotes", "")).strip())
+            else:
+                raise ValueError("Only pending requests can be approved or rejected.")
         else:
             if row["request_status"] != "Pending" or action != "cancelled":
                 raise ValueError("Only pending requests can be cancelled.")
-            connection.execute("UPDATE borrowing_requests SET request_status = 'Cancelled' WHERE request_id = ?", (request_id,))
+            if not User(row["account_id"], "", "user").cancel_request(connection, request_id):
+                raise ValueError("Only your pending requests can be cancelled.")
         connection.commit()
         return jsonify(ok=True, request=next(row for row in request_rows(None if session["role"] == "laboratory_staff" else session["account_id"]) if row["id"] == request_id))
-    except (ValueError, sqlite3.IntegrityError) as exc:
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         connection.rollback()
         return api_error(str(exc))
 
 
+@app.post("/api/staff/requests/<request_id>/approve")
+@require_role("laboratory_staff")
+def approve_staff_request(request_id):
+    try:
+        account_from_session().approve_request(db(), request_id, str(json_body().get("reviewNotes", "")).strip())
+        return jsonify(ok=True, request=next(row for row in request_rows() if row["id"] == request_id))
+    except (ValueError, mysql.connector.IntegrityError) as exc:
+        db().rollback()
+        return api_error(str(exc))
+
+
+@app.post("/api/staff/requests/<request_id>/reject")
+@require_role("laboratory_staff")
+def reject_staff_request(request_id):
+    try:
+        account_from_session().reject_request(db(), request_id, str(json_body().get("reviewNotes", "")).strip())
+        return jsonify(ok=True, request=next(row for row in request_rows() if row["id"] == request_id))
+    except (ValueError, mysql.connector.IntegrityError) as exc:
+        db().rollback()
+        return api_error(str(exc))
+
+
+@app.delete("/api/requests/<request_id>")
+@require_role("user")
+def cancel_request(request_id):
+    connection = db()
+    try:
+        if not User(session["account_id"], "", "user").cancel_request(connection, request_id):
+            return api_error("Only your pending requests can be cancelled.")
+        connection.commit()
+        return jsonify(ok=True)
+    except mysql.connector.Error:
+        connection.rollback()
+        raise
+
+
 @app.post("/api/requests/<request_id>/release")
+@app.post("/api/staff/requests/<request_id>/release")
 @require_role("laboratory_staff")
 def release_request(request_id):
     connection = db()
     try:
-        with connection:
-            req = connection.execute("SELECT * FROM borrowing_requests WHERE request_id = ?", (request_id,)).fetchone()
-            if not req or req["request_status"] != "Approved":
-                raise ValueError("Only an approved request can be released.")
-            items = connection.execute("SELECT * FROM borrowing_request_items WHERE request_id = ?", (request_id,)).fetchall()
-            if not items:
-                raise ValueError("This request has no equipment items.")
-            for item in items:
-                equipment = require_existing_equipment(item["equipment_id"])
-                if (equipment["equipment_status"] != "Active" or equipment["borrow_status"] != "Available"
-                        or equipment["available_quantity"] < item["requested_quantity"]):
-                    raise ValueError(f"Not enough available stock for {equipment['equipment_name']}.")
-            transaction_id = new_id("TXN")
-            now = iso_now()
-            connection.execute(
-                """INSERT INTO borrowing_transactions
-                   (transaction_id, request_id, released_by, release_datetime, return_deadline)
-                   VALUES (?, ?, ?, ?, ?)""",
-                (transaction_id, request_id, session["account_id"], now, req["requested_return_datetime"]),
-            )
-            for item in items:
-                connection.execute(
-                    "UPDATE equipment SET available_quantity = available_quantity - ?, last_updated = ? WHERE equipment_id = ?",
-                    (item["requested_quantity"], now, item["equipment_id"]),
-                )
-                connection.execute(
-                    "INSERT INTO transaction_items (transaction_id, equipment_id, quantity_borrowed) VALUES (?, ?, ?)",
-                    (transaction_id, item["equipment_id"], item["requested_quantity"]),
-                )
+        staff = account_from_session()
+        transaction_id = staff.release_equipment(connection, request_id)
         return jsonify(ok=True, transactionId=transaction_id), 201
-    except (ValueError, sqlite3.IntegrityError) as exc:
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         connection.rollback()
         return api_error(str(exc))
 
 
 @app.get("/api/transactions")
+@app.get("/api/transactions/mine")
 @require_role("laboratory_staff", "user")
 def list_transactions():
     rows = request_rows(None if session["role"] == "laboratory_staff" else session["account_id"])
+    return jsonify(items=[row for row in rows if row["transactionId"]])
+
+
+@app.get("/api/staff/transactions")
+@require_role("laboratory_staff")
+def staff_transactions():
+    rows = request_rows()
     return jsonify(items=[row for row in rows if row["transactionId"]])
 
 
@@ -655,51 +760,113 @@ def request_extension(transaction_id):
             return api_error("Borrowing transaction was not found.", 404)
         if row["transaction_status"] not in ("Active", "Partially Returned", "Overdue") or not reason:
             raise ValueError("An active transaction and extension reason are required.")
-        if proposed <= row["return_deadline"]:
+        if datetime.fromisoformat(proposed) <= datetime.fromisoformat(row["return_deadline"]):
             raise ValueError("Choose a date later than the current return deadline.")
-        existing = connection.execute(
-            "SELECT 1 FROM extension_requests WHERE transaction_id = ?",
-            (transaction_id,),
-        ).fetchone()
-        if existing:
-            raise ValueError("Only one extension request is allowed per transaction.")
-        connection.execute(
-            """INSERT INTO extension_requests
-               (extension_id, transaction_id, account_id, reason, requested_new_due_date)
-               VALUES (?, ?, ?, ?, ?)""",
-            (new_id("EXT"), transaction_id, session["account_id"], reason, proposed),
+        extension_id = User(session["account_id"], "", "user").request_extension(
+            connection, transaction_id, reason, proposed
         )
-        connection.commit()
-        return jsonify(ok=True), 201
-    except (ValueError, sqlite3.IntegrityError) as exc:
+        return jsonify(ok=True, extensionId=extension_id), 201
+    except (ValueError, mysql.connector.IntegrityError) as exc:
         db().rollback()
         return api_error(str(exc))
 
 
+@app.post("/api/extensions")
+@require_role("user")
+def create_extension():
+    transaction_id = str(json_body().get("transactionId", "")).strip()
+    if not transaction_id:
+        return api_error("Choose a borrowing transaction.")
+    return request_extension(transaction_id)
+
+
+@app.get("/api/extensions/mine")
+@require_role("user")
+def my_extensions():
+    rows = db().execute(
+        """SELECT er.extension_id, er.transaction_id, er.reason, er.requested_new_due_date,
+                  er.extension_status, er.submitted_at
+           FROM extension_requests er WHERE er.account_id = ? ORDER BY er.submitted_at DESC""",
+        (session["account_id"],),
+    ).fetchall()
+    return jsonify(items=[
+        {"id": row["extension_id"], "transactionId": row["transaction_id"], "reason": row["reason"],
+         "newDueDate": row["requested_new_due_date"], "status": row["extension_status"],
+         "submittedAt": row["submitted_at"]}
+        for row in rows
+    ])
+
+
+@app.get("/api/staff/extensions")
+@require_role("laboratory_staff")
+def staff_extensions():
+    rows = db().execute(
+        """SELECT er.extension_id, er.transaction_id, er.account_id, a.full_name, er.reason,
+                  er.requested_new_due_date, er.extension_status, er.submitted_at
+           FROM extension_requests er JOIN accounts a ON a.account_id = er.account_id
+           ORDER BY er.submitted_at DESC"""
+    ).fetchall()
+    return jsonify(items=[
+        {"id": row["extension_id"], "transactionId": row["transaction_id"], "accountId": row["account_id"],
+         "studentName": row["full_name"], "reason": row["reason"], "newDueDate": row["requested_new_due_date"],
+         "status": row["extension_status"], "submittedAt": row["submitted_at"]}
+        for row in rows
+    ])
+
+
 @app.patch("/api/extensions/<extension_id>")
+@app.post("/api/staff/extensions/<extension_id>/approve")
+@app.post("/api/staff/extensions/<extension_id>/reject")
 @require_role("laboratory_staff")
 def review_extension(extension_id):
     data = json_body()
     action = str(data.get("status", "")).lower()
+    if request.path.endswith("/approve"):
+        action = "approved"
+    elif request.path.endswith("/reject"):
+        action = "rejected"
     connection = db()
     row = connection.execute("SELECT * FROM extension_requests WHERE extension_id = ?", (extension_id,)).fetchone()
     if not row or row["extension_status"] != "Pending" or action not in ("approved", "rejected"):
         return api_error("This extension request is no longer pending.", 404)
-    with connection:
-        connection.execute(
-            """UPDATE extension_requests SET extension_status = ?, reviewed_by = ?, reviewed_at = ?
-               WHERE extension_id = ?""",
-            (action.capitalize(), session["account_id"], iso_now(), extension_id),
-        )
-        if action == "approved":
-            connection.execute(
-                "UPDATE borrowing_transactions SET return_deadline = ?, transaction_status = 'Active' WHERE transaction_id = ?",
-                (row["requested_new_due_date"], row["transaction_id"]),
+    try:
+        with connection:
+            current = connection.execute(
+                "SELECT extension_status FROM extension_requests WHERE extension_id = ? FOR UPDATE",
+                (extension_id,),
+            ).fetchone()
+            if not current or current["extension_status"] != "Pending":
+                raise ValueError("This extension request is no longer pending.")
+            if action == "approved":
+                transaction = connection.execute(
+                    """SELECT transaction_status FROM borrowing_transactions
+                       WHERE transaction_id = ? FOR UPDATE""",
+                    (row["transaction_id"],),
+                ).fetchone()
+                if not transaction or transaction["transaction_status"] not in (
+                    "Active", "Partially Returned", "Overdue"
+                ):
+                    raise ValueError("Only an active transaction can be extended.")
+            cursor = connection.execute(
+                """UPDATE extension_requests SET extension_status = ?, reviewed_by = ?, reviewed_at = ?
+                   WHERE extension_id = ? AND extension_status = 'Pending'""",
+                (action.capitalize(), session["account_id"], iso_now(), extension_id),
             )
+            if cursor.rowcount != 1:
+                raise ValueError("This extension request is no longer pending.")
+            if action == "approved":
+                connection.execute(
+                    "UPDATE borrowing_transactions SET return_deadline = ?, transaction_status = 'Active' WHERE transaction_id = ?",
+                    (row["requested_new_due_date"], row["transaction_id"]),
+                )
+    except ValueError as exc:
+        connection.rollback()
+        return api_error(str(exc))
     return jsonify(ok=True)
 
 
 @app.post("/api/transactions/<transaction_id>/returns")
+@app.post("/api/staff/transactions/<transaction_id>/returns")
 @require_role("laboratory_staff")
 def confirm_return(transaction_id):
     data = json_body()
@@ -713,68 +880,9 @@ def confirm_return(transaction_id):
     if not transaction["return_requested_at"]:
         return api_error("The user must submit this equipment for return before staff can confirm it.")
     try:
-        now = iso_now()
-        with connection:
-            for item in records:
-                item_id = int(item.get("transactionItemId"))
-                quantity = validate_quantity(item.get("quantity"))
-                condition = str(item.get("condition", "Good")).strip()
-                if condition not in ("Good", "Needs Repair", "Damaged", "Improper Return"):
-                    raise ValueError("Select a valid return condition.")
-                row = connection.execute(
-                    """SELECT ti.*, e.equipment_id FROM transaction_items ti
-                       JOIN equipment e USING (equipment_id)
-                       WHERE ti.transaction_item_id = ? AND ti.transaction_id = ?""",
-                    (item_id, transaction_id),
-                ).fetchone()
-                if not row or quantity > row["quantity_borrowed"] - row["quantity_returned"] - row["quantity_lost"]:
-                    raise ValueError("Returned quantity exceeds the outstanding quantity.")
-                connection.execute(
-                    "UPDATE transaction_items SET quantity_returned = quantity_returned + ? WHERE transaction_item_id = ?",
-                    (quantity, item_id),
-                )
-                if condition == "Good":
-                    connection.execute(
-                        "UPDATE equipment SET available_quantity = available_quantity + ?, last_updated = ? WHERE equipment_id = ?",
-                        (quantity, now, row["equipment_id"]),
-                    )
-                else:
-                    equipment_condition = "Needs Repair" if condition in ("Damaged", "Improper Return") else "Good"
-                    connection.execute(
-                        "UPDATE equipment SET condition_status = ?, last_updated = ? WHERE equipment_id = ?",
-                        (equipment_condition, now, row["equipment_id"]),
-                    )
-                    case_type = "Improper Return" if condition == "Improper Return" else "Damaged"
-                    connection.execute(
-                        """INSERT INTO other_cases
-                           (case_id, transaction_item_id, recorded_by, case_type, quantity, description)
-                           VALUES (?, ?, ?, ?, ?, ?)""",
-                        (new_id("CASE"), item_id, session["account_id"], case_type, quantity,
-                         str(item.get("notes", "")).strip() or condition + " condition recorded during return inspection."),
-                    )
-                connection.execute(
-                    """INSERT INTO return_records
-                       (return_id, transaction_item_id, inspected_by, quantity_returned,
-                        actual_return_datetime, condition_status, inspection_notes)
-                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (new_id("RET"), item_id, session["account_id"], quantity, now, condition, str(item.get("notes", "")).strip()),
-                )
-            quantities = connection.execute(
-                "SELECT quantity_borrowed, quantity_returned, quantity_lost FROM transaction_items WHERE transaction_id = ?",
-                (transaction_id,),
-            ).fetchall()
-            outstanding = sum(item["quantity_borrowed"] - item["quantity_returned"] - item["quantity_lost"] for item in quantities)
-            returned = sum(item["quantity_returned"] for item in quantities)
-            status = "Returned" if outstanding == 0 else ("Partially Returned" if returned else transaction["transaction_status"])
-            actual_return = now if status == "Returned" else None
-            connection.execute(
-                """UPDATE borrowing_transactions SET transaction_status = ?,
-                   actual_return_datetime = COALESCE(?, actual_return_datetime), return_requested_at = NULL
-                   WHERE transaction_id = ?""",
-                (status, actual_return, transaction_id),
-            )
+        status = account_from_session().record_returns(connection, transaction_id, records)
         return jsonify(ok=True, status=status)
-    except (ValueError, TypeError, sqlite3.IntegrityError) as exc:
+    except (ValueError, TypeError, mysql.connector.IntegrityError) as exc:
         connection.rollback()
         return api_error(str(exc))
 
@@ -802,36 +910,101 @@ def record_case(transaction_id):
             outstanding = item["quantity_borrowed"] - item["quantity_returned"] - item["quantity_lost"]
             if quantity > outstanding:
                 raise ValueError("Case quantity exceeds the outstanding borrowed quantity.")
-            connection.execute(
-                """INSERT INTO other_cases
-                   (case_id, transaction_item_id, recorded_by, case_type, quantity, description)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
-                (new_id("CASE"), item_id, session["account_id"], case_type, quantity, description),
+            account_from_session().record_case(
+                connection, item_id, case_type, quantity, description
             )
             if case_type == "Lost":
                 connection.execute("UPDATE transaction_items SET quantity_lost = quantity_lost + ? WHERE transaction_item_id = ?", (quantity, item_id))
-                connection.execute("UPDATE equipment SET total_quantity = total_quantity - ?, last_updated = ? WHERE equipment_id = ?", (quantity, iso_now(), item["equipment_id"]))
+                Equipment.update_quantity(connection, item["equipment_id"], 0, -quantity)
             elif case_type in ("Damaged", "Improper Return"):
-                connection.execute("UPDATE equipment SET condition_status = 'Needs Repair', last_updated = ? WHERE equipment_id = ?", (iso_now(), item["equipment_id"]))
-            rest = connection.execute(
-                "SELECT SUM(quantity_borrowed - quantity_returned - quantity_lost) AS outstanding FROM transaction_items WHERE transaction_id = ?",
-                (transaction_id,),
-            ).fetchone()["outstanding"]
-            if rest == 0:
-                connection.execute("UPDATE borrowing_transactions SET transaction_status = 'Lost', actual_return_datetime = ? WHERE transaction_id = ?", (iso_now(), transaction_id))
+                Equipment.update_condition(connection, item["equipment_id"], "Needs Repair")
+            BorrowingTransaction.update_status(connection, transaction_id)
         return jsonify(ok=True)
-    except (ValueError, TypeError, sqlite3.IntegrityError) as exc:
+    except (ValueError, TypeError, mysql.connector.IntegrityError) as exc:
         db().rollback()
         return api_error(str(exc))
 
 
+@app.get("/api/staff/cases")
+@require_role("laboratory_staff")
+def list_cases():
+    rows = db().execute(
+        """SELECT oc.*, e.equipment_name, bt.transaction_id, br.account_id, a.full_name
+           FROM other_cases oc
+           JOIN transaction_items ti ON ti.transaction_item_id = oc.transaction_item_id
+           JOIN equipment e ON e.equipment_id = ti.equipment_id
+           JOIN borrowing_transactions bt ON bt.transaction_id = ti.transaction_id
+           JOIN borrowing_requests br ON br.request_id = bt.request_id
+           JOIN accounts a ON a.account_id = br.account_id
+           ORDER BY oc.date_recorded DESC"""
+    ).fetchall()
+    return jsonify(items=[
+        {"id": row["case_id"], "transactionId": row["transaction_id"], "transactionItemId": row["transaction_item_id"],
+         "accountId": row["account_id"], "studentName": row["full_name"], "equipment": row["equipment_name"],
+         "type": row["case_type"], "quantity": row["quantity"], "description": row["description"],
+         "date": row["date_recorded"], "resolutionStatus": row["resolution_status"],
+         "resolutionNotes": row["resolution_notes"], "resolvedAt": row["resolved_at"]}
+        for row in rows
+    ])
+
+
+@app.post("/api/staff/cases")
+@require_role("laboratory_staff")
+def create_staff_case():
+    data = json_body()
+    transaction_id = str(data.get("transactionId", "")).strip()
+    if not transaction_id:
+        return api_error("Choose a borrowing transaction.")
+    return record_case(transaction_id)
+
+
+@app.put("/api/staff/cases/<case_id>")
+@require_role("laboratory_staff")
+def update_case(case_id):
+    data = json_body()
+    description = str(data.get("description", "")).strip()
+    resolution_notes = str(data.get("resolutionNotes", "")).strip()
+    action = str(data.get("resolutionStatus", "")).strip().lower()
+    if not description:
+        return api_error("Incident description is required.")
+    if action not in ("under review", "resolved"):
+        return api_error("Choose a valid incident resolution status.")
+    connection = db()
+    try:
+        if action == "resolved":
+            changed = account_from_session().resolve_case(connection, case_id, resolution_notes)
+        else:
+            changed = OtherCases.update(connection, case_id, description, resolution_notes)
+        if not changed:
+            return api_error("An unresolved incident with that ID was not found.", 404)
+        connection.commit()
+        return jsonify(ok=True)
+    except mysql.connector.Error:
+        connection.rollback()
+        raise
+
+
 @app.get("/api/dashboard")
+@app.get("/api/dashboard/staff")
 @require_role("laboratory_staff")
 def dashboard_data():
     equipment = equipment_rows(True)
     requests = request_rows()
     transactions = [item for item in requests if item["transactionId"]]
     now = datetime.now().astimezone()
+    extra_stats = db().execute(
+        """SELECT
+             (SELECT COUNT(*) FROM extension_requests WHERE extension_status = 'Pending') AS pending_extensions,
+             (SELECT COUNT(*) FROM borrowing_requests br
+              LEFT JOIN borrowing_transactions bt ON bt.request_id = br.request_id
+              WHERE br.request_status = 'Approved' AND bt.transaction_id IS NULL) AS awaiting_release,
+             (SELECT COUNT(*) FROM borrowing_transactions
+              WHERE transaction_status IN ('Active', 'Partially Returned', 'Overdue')) AS active_transactions,
+             (SELECT COUNT(*) FROM equipment
+              WHERE equipment_status = 'Active' AND condition_status = 'Needs Repair') AS damaged_equipment,
+             (SELECT COUNT(*) FROM other_cases WHERE case_type = 'Lost') AS lost_cases,
+             (SELECT COUNT(*) FROM other_cases WHERE resolution_status = 'Under Review') AS open_cases"""
+    ).fetchone()
     return jsonify(
         stats={
             "equipment": len([item for item in equipment if item["active"]]),
@@ -840,11 +1013,36 @@ def dashboard_data():
             "pending": sum(1 for item in requests if item["requestStatus"] == "pending"),
             "borrowed": sum(item["outstanding"] for row in transactions for item in row["items"]),
             "overdue": sum(1 for row in transactions if row["status"] == "overdue"),
+            "pendingExtensions": extra_stats["pending_extensions"],
+            "awaitingRelease": extra_stats["awaiting_release"],
+            "activeTransactions": extra_stats["active_transactions"],
+            "damagedEquipment": extra_stats["damaged_equipment"],
+            "lostCases": extra_stats["lost_cases"],
+            "openCases": extra_stats["open_cases"],
         },
         pendingRequests=[row for row in requests if row["requestStatus"] == "pending"][:5],
         upcomingReturns=[row for row in transactions if row["status"] in ("active", "overdue", "partially_returned") and row["returnBy"]][:8],
         recentActivity=connection_rows("activity"),
         serverTime=now.isoformat(timespec="minutes"),
+    )
+
+
+@app.get("/api/dashboard/user")
+@require_role("user")
+def user_dashboard_data():
+    requests = request_rows(session["account_id"])
+    equipment = equipment_rows()
+    transactions = [row for row in requests if row["transactionId"]]
+    return jsonify(
+        user={"id": session["account_id"], "name": account_from_session().name},
+        stats={
+            "availableEquipment": len([item for item in equipment if item["stock"] > 0]),
+            "pendingRequests": sum(1 for row in requests if row["requestStatus"] == "pending"),
+            "activeTransactions": sum(1 for row in transactions if row["status"] in ("active", "partially_returned")),
+            "overdueTransactions": sum(1 for row in transactions if row["status"] == "overdue"),
+        },
+        recentRequests=requests[:5],
+        transactions=transactions,
     )
 
 
@@ -976,7 +1174,7 @@ def save_settings():
     if not values:
         return api_error("No supported settings were supplied.")
     db().executemany(
-        "INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value",
+        "INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)",
         values,
     )
     db().commit()
