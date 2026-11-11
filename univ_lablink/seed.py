@@ -68,7 +68,7 @@ def seed():
             }
             connection.executemany(
                 "INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES (?, ?)",
-                defaults.items(),
+                list(defaults.items()),
             )
     finally:
         connection.close()
