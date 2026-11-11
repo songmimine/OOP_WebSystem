@@ -515,3 +515,43 @@
     gap: 20px;
   }
 }
+
+.admin-header {
+  --ah-navy: #102b52;
+  --ah-muted: #61708a;
+  --ah-field: #edf3fa;
+}
+
+.ah-topbar {
+  min-height: 78px;
+  padding: 10px clamp(18px, 4vw, 56px);
+  border-bottom: 1px solid #dce5f0;
+}
+
+.ah-brand__title {
+  color: #102b52;
+  letter-spacing: .08em;
+}
+
+.ah-search {
+  height: 44px;
+  border: 1px solid #dce5f0;
+}
+
+.ah-search__btn,
+.ah-nav {
+  background: #102b52;
+}
+
+.ah-nav__list {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.ah-nav__link {
+  min-height: 50px;
+}
+
+.ah-nav__link.is-active::after {
+  background: #e8ab27;
+}

@@ -128,3 +128,201 @@
   .admin-content { padding: 22px 14px; }
   .portal-toolbar input[type="search"] { max-width: none; }
 }
+
+/*
+  LabLink visual contract
+  THESIS: A calm laboratory operations console that makes the next safe action obvious,
+  rather than another generic dashboard of equal-weight cards.
+  OWN-WORLD: Ink navy, paper white, cobalt controls, and a single saffron signal color;
+  hairline rules, instrument-panel labels, and generous working space.
+  STORY: A student can see what needs attention, find equipment, and submit or track a
+  request without losing context.
+  FIRST VIEWPORT: Shared brand/search bar, deep-blue navigation band, then a focused
+  page heading and one primary workspace on a lightly ruled field.
+  FORM: Operate mode; a restrained editorial-instrument layout carried across every
+  existing static page, preserving all backend-driven content and interactions.
+*/
+
+:root {
+  --portal-ink: #17243b;
+  --portal-navy: #102b52;
+  --portal-navy-deep: #071b38;
+  --portal-muted: #61708a;
+  --portal-line: #dce5f0;
+  --portal-surface: #ffffff;
+  --portal-page: #f3f6fa;
+  --portal-blue: #1d66c1;
+  --portal-blue-light: #eaf3ff;
+  --portal-accent: #e8ab27;
+  --portal-green: #16704b;
+  --portal-red: #b83232;
+  --portal-shadow: 0 16px 38px rgba(16, 43, 82, .08);
+}
+
+.portal-page,
+.admin-portal-page {
+  background:
+    linear-gradient(rgba(16, 43, 82, .028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 43, 82, .028) 1px, transparent 1px),
+    var(--portal-page);
+  background-size: 32px 32px;
+  color: var(--portal-ink);
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.portal-main {
+  width: min(1240px, calc(100% - 64px));
+  padding: 48px 0 88px;
+}
+
+.portal-heading {
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.portal-kicker {
+  color: var(--portal-blue);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.portal-heading h1 {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(30px, 4vw, 48px);
+  letter-spacing: -.05em;
+}
+
+.portal-heading p {
+  max-width: 680px;
+  color: var(--portal-muted);
+}
+
+.portal-card {
+  padding: 28px;
+  border: 1px solid rgba(220, 229, 240, .95);
+  border-radius: 18px;
+  box-shadow: var(--portal-shadow);
+}
+
+.portal-card h2,
+.portal-card h3 {
+  font-family: "Poppins", "Inter", sans-serif;
+  letter-spacing: -.025em;
+}
+
+.portal-button {
+  min-height: 44px;
+  border-radius: 9px;
+  background: var(--portal-navy);
+  box-shadow: 0 5px 12px rgba(16, 43, 82, .15);
+}
+
+.portal-button:hover {
+  background: var(--portal-navy-deep);
+  box-shadow: 0 8px 18px rgba(16, 43, 82, .2);
+}
+
+.portal-button--blue {
+  background: var(--portal-blue);
+}
+
+.portal-button--secondary {
+  box-shadow: none;
+}
+
+.portal-input,
+.portal-select,
+.portal-textarea,
+.portal-toolbar input[type="search"] {
+  min-height: 44px;
+  border-color: #cbd8e8;
+  border-radius: 9px;
+  background: rgba(255,255,255,.92);
+}
+
+.portal-label {
+  color: var(--portal-navy);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.portal-table th {
+  background: var(--portal-navy);
+  color: #fff;
+  letter-spacing: .1em;
+}
+
+.portal-table td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.portal-table tbody tr:hover {
+  background: #f6f9fd;
+}
+
+.portal-pill {
+  border: 1px solid rgba(22,112,75,.18);
+}
+
+.portal-empty {
+  padding: 72px 24px;
+  border-style: solid;
+  box-shadow: var(--portal-shadow);
+}
+
+.portal-note {
+  border-color: #cfe0f8;
+  background: var(--portal-blue-light);
+}
+
+.portal-modal {
+  border: 1px solid var(--portal-line);
+  border-radius: 18px;
+}
+
+.admin-portal-page {
+  --portal-page: #eef3f8;
+}
+
+.admin-shell {
+  grid-template-columns: 252px minmax(0, 1fr);
+}
+
+.admin-sidebar {
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.06), transparent 40%),
+    var(--portal-navy-deep);
+}
+
+.admin-brand-mark {
+  background: var(--portal-accent);
+}
+
+.admin-topbar {
+  min-height: 78px;
+  box-shadow: 0 1px 0 rgba(16, 43, 82, .04);
+}
+
+.admin-content {
+  padding: 42px;
+}
+
+.portal-stat {
+  border-top: 0;
+  border-left: 4px solid var(--portal-accent);
+  border-radius: 16px;
+}
+
+@media (max-width: 760px) {
+  .portal-main {
+    width: min(100% - 32px, 1240px);
+    padding-top: 32px;
+  }
+
+  .portal-card {
+    padding: 22px;
+    border-radius: 14px;
+  }
+}
