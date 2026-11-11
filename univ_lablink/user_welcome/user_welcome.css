@@ -161,3 +161,68 @@ body {
   .welcome__title { font-size: 1.8rem; }
   .welcome__subtitle { font-size: 1rem; }
 }
+
+body {
+  background:
+    radial-gradient(circle at 50% 45%, #e8f2ff 0, transparent 34%),
+    #f3f6fa;
+}
+
+.header {
+  min-height: 82px;
+  padding: 12px clamp(20px, 5vw, 72px);
+  background: #071b38;
+}
+
+.header__title {
+  letter-spacing: .12em;
+}
+
+.main {
+  position: relative;
+  overflow: hidden;
+}
+
+.main::before,
+.main::after {
+  position: absolute;
+  content: "";
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(29,102,193,.15);
+  border-radius: 50%;
+}
+
+.main::before { transform: translate(-230px, -90px); }
+.main::after { transform: translate(230px, 90px); }
+
+.welcome {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome__title {
+  color: #102b52;
+  letter-spacing: -.05em;
+}
+
+.welcome__subtitle {
+  color: #61708a;
+}
+
+.lab-icon {
+  filter: drop-shadow(0 14px 18px rgba(16,43,82,.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome,
+  .liquid__rise,
+  .liquid__wave,
+  .liquid__wave--back {
+    animation: none;
+  }
+
+  .welcome {
+    opacity: 1;
+  }
+}

@@ -6,8 +6,20 @@ const REDIRECT_DELAY_MS = 5800;
 const USER_DASHBOARD_URL = "../user_dashboard/user_dashboard.html";
 
 window.addEventListener("load", () => {
-  setTimeout(() => {
-    // replace() keeps this loading screen out of the back-button history
-    window.location.replace(USER_DASHBOARD_URL);
-  }, REDIRECT_DELAY_MS);
+  fetch("/api/me", { credentials: "same-origin" })
+    .then((response) => response.ok ? response.json() : null)
+    .then((user) => {
+      if (user && user.name) {
+        document.getElementById("welcome-name").textContent = user.name.split(" ")[0];
+      }
+    })
+    .catch(() => {
+      // The protected dashboard remains the source of truth if the profile request fails.
+    })
+    .finally(() => {
+      setTimeout(() => {
+        // replace() keeps this loading screen out of the back-button history
+        window.location.replace(USER_DASHBOARD_URL);
+      }, REDIRECT_DELAY_MS);
+    });
 });
