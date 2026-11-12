@@ -20,9 +20,8 @@
         <p>Review the equipment and schedule before submitting your request to laboratory staff.</p>
       </div>
     </div>
-    <form id="request-form" class="request-layout">
-      <div class="request-layout__main">
-        <section class="portal-card" aria-labelledby="student-details-title">
+    <form id="request-form">
+      <section class="portal-card" aria-labelledby="student-details-title">
         <h2 id="student-details-title">User Details</h2>
         <p class="portal-muted">Pre-filled from your student account</p>
         <div class="portal-form-grid" style="margin-top:18px">
@@ -34,8 +33,8 @@
           <label class="portal-field"><span class="portal-label">Return date</span><input id="return-date" class="portal-input" type="date" required></label>
           <label class="portal-field portal-field--wide"><span class="portal-label">Notes (optional)</span><textarea id="notes" class="portal-textarea" placeholder="Add any details the laboratory staff should know"></textarea></label>
         </div>
-        </section>
-        <section class="portal-card" aria-labelledby="selected-items-title">
+      </section>
+      <section class="portal-card" aria-labelledby="selected-items-title">
         <h2 id="selected-items-title">Selected Equipment</h2>
         <p class="portal-muted">Choose available items and set the quantity you need.</p>
         <div class="portal-table-wrap" style="margin-top:12px">
@@ -45,29 +44,16 @@
           </table>
         </div>
         <p id="no-items" class="portal-note" hidden>Your request is empty. Browse equipment or add available items below.</p>
-        </section>
-        <div class="portal-actions" style="margin-top:20px">
+        <details style="margin-top:18px">
+          <summary style="cursor:pointer;font-weight:650;color:var(--portal-navy)">Add equipment from inventory</summary>
+          <div class="portal-grid portal-grid--2" id="available-items" style="margin-top:14px"></div>
+        </details>
+      </section>
+      <div class="portal-actions" style="margin-top:20px">
         <a class="portal-button portal-button--secondary" href="../equipment_catalog/equipment_catalog.html">Browse inventory</a>
         <button class="portal-button" id="submit-request" type="submit">Submit borrowing request</button>
       </div>
-        <p class="portal-note" id="request-status" role="status" hidden></p>
-      </div>
-      <aside class="request-layout__side" aria-label="Available equipment inventory">
-        <section class="portal-card request-inventory">
-          <div class="request-inventory__heading">
-            <div>
-              <p class="portal-kicker">Live inventory</p>
-              <h2>Available Equipment Inventory</h2>
-            </div>
-          </div>
-          <div class="request-inventory__search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.2 4.2"></path></svg>
-            <input id="available-search" type="search" placeholder="Search inventory..." aria-label="Search available equipment">
-          </div>
-          <div class="request-inventory__chips" role="group" aria-label="Inventory categories"></div>
-          <div class="request-inventory__list" id="available-items"></div>
-        </section>
-      </aside>
+      <p class="portal-note" id="request-status" role="status" hidden></p>
     </form>
     <section class="portal-card" id="request-view" hidden>
       <div class="portal-heading"><div><p class="portal-kicker">Request details</p><h2 id="view-request-id"></h2></div><span class="portal-pill portal-pill--pending" id="view-request-status"></span></div>

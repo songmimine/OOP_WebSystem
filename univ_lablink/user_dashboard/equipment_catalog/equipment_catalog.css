@@ -317,61 +317,6 @@
   background: #102b52;
 }
 
-.catalog-categories {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin: 0 0 16px;
-}
-
-.catalog-categories__label {
-  width: 100%;
-  color: #173b69;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-.catalog-category-chip {
-  min-width: 150px;
-  padding: 8px 18px;
-  border: 1px solid #d4dce6;
-  border-radius: 999px;
-  background: #fff;
-  color: #5b6677;
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
-}
-
-.catalog-category-chip:hover,
-.catalog-category-chip.is-active {
-  border-color: #153b67;
-  background: #153b67;
-  color: #fff;
-}
-
-.catalog-category-chip:hover {
-  transform: translateY(-1px);
-}
-
-.catalog-item-image {
-  width: 38px;
-  height: 40px;
-  background: #fff;
-  border: 1px solid #e4e9ef;
-}
-
-@media (max-width: 650px) {
-  .catalog-category-chip {
-    min-width: 0;
-    flex: 1 1 135px;
-  }
-}
-
 .catalog-empty-row {
   padding: 28px !important;
   color: var(--portal-muted) !important;
