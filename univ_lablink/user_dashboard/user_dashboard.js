@@ -43,8 +43,10 @@
     var overdue = requests.reduce(function (total, row) {
       return total + (row.status === "overdue" ? row.items.reduce(function (sum, item) { return sum + item.outstanding; }, 0) : 0);
     }, 0);
+    var upcoming = deadlines().filter(function (entry) { return entry.diff >= 0; }).length;
     byId("stat-active").textContent = String(open.length);
     byId("stat-return").textContent = String(borrowed);
+    byId("stat-upcoming").textContent = String(upcoming);
     byId("stat-overdue").textContent = String(overdue);
   }
 
