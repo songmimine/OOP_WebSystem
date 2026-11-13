@@ -645,8 +645,9 @@
 
 .dash-fab-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: -4px;
+  right: -4px;
+  z-index: 1;
   display: grid;
   place-items: center;
   min-width: 20px;
@@ -956,8 +957,8 @@
 }
 
 .dash-layout {
-  grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr);
-  max-width: 1440px;
+  grid-template-columns: clamp(220px, 16vw, 280px) minmax(0, 1fr);
+  max-width: none;
   margin: 0 auto;
 }
 
@@ -984,7 +985,9 @@
 }
 
 .dash-main {
-  max-width: 1240px;
+  width: 100%;
+  max-width: 1720px;
+  margin-inline: auto;
   padding: 46px clamp(24px, 4vw, 64px) 120px;
 }
 

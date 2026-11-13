@@ -1,6 +1,7 @@
 .lablink-footer {
   --footer-ink: #f7f9fc;
   --footer-muted: #c4cfde;
+  box-sizing: border-box;
   width: 100%;
   margin-top: 24px;
   padding: 28px clamp(20px, 4vw, 56px) 14px;
