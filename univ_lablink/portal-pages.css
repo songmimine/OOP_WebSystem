@@ -393,6 +393,19 @@
   }
 }
 
+@media (max-width: 1080px) {
+  .portal-main {
+    width: min(100% - 40px, 1240px);
+  }
+}
+
+@media (max-width: 620px) {
+  .portal-main {
+    width: min(100% - 28px, 1240px);
+    padding-bottom: 72px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .portal-button:hover,
   .portal-chip:hover,
@@ -534,7 +547,20 @@
 }
 
 .portal-button--secondary {
+  color: var(--portal-navy);
+  background: #fff;
+  border-color: #cdd7e6;
   box-shadow: none;
+}
+
+.portal-button--secondary:hover {
+  color: var(--portal-navy);
+  background: #f4f7fb;
+}
+
+.portal-toast {
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
 }
 
 .portal-input,
