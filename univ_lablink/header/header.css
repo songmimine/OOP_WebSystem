@@ -480,6 +480,82 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
+  /* LabLink shared shell: brand-led, spacious, and readable at a glance. */
+  .main-system-header {
+    --msh-navy: #102b52;
+    --msh-navy-deep: #071b38;
+    --msh-ink: #17243b;
+    --msh-muted: #61708a;
+    --msh-line: #dce5f0;
+    --msh-field: #edf3fa;
+    --msh-hover: #e5eef9;
+    --msh-red: #b83232;
+  }
+
+  .main-system-header .msh-topbar {
+    min-height: 82px;
+    padding: 10px clamp(18px, 4vw, 56px);
+    gap: clamp(18px, 3vw, 44px);
+  }
+
+  .main-system-header .msh-logo {
+    height: 54px;
+  }
+
+  .main-system-header .msh-title {
+    color: var(--msh-navy);
+    font-family: "Poppins", "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+  }
+
+  .main-system-header .msh-search {
+    max-width: 620px;
+    height: 44px;
+    background: #f2f6fb;
+    border: 1px solid #dfe7f1;
+  }
+
+  .main-system-header .msh-search-btn {
+    padding: 0 20px;
+    background: var(--msh-navy);
+  }
+
+  .main-system-header .msh-nav {
+    background: var(--msh-navy);
+  }
+
+  .main-system-header .msh-nav-list {
+    justify-content: flex-start;
+    max-width: 1240px;
+    gap: 30px;
+  }
+
+  .main-system-header .msh-nav-link {
+    height: 50px;
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+
+  .main-system-header .msh-nav-link.is-active::after {
+    height: 3px;
+    background: #f0b52c;
+  }
+
+  @media (max-width: 860px) {
+    .main-system-header .msh-topbar {
+      grid-template-columns: 1fr auto;
+    }
+
+    .main-system-header .msh-search {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      max-width: none;
+      margin: 0;
+    }
+  }
   to {
     opacity: 1;
     transform: translateY(0);
@@ -606,70 +682,4 @@
     animation: none !important;
     transition: none !important;
   }
-}
-
-/* ---------- LabLink shared shell (moved out of @keyframes) ---------- */
-.main-system-header {
-  --msh-navy: #102b52;
-  --msh-navy-deep: #071b38;
-  --msh-ink: #17243b;
-  --msh-muted: #61708a;
-  --msh-line: #dce5f0;
-  --msh-field: #edf3fa;
-  --msh-hover: #e5eef9;
-  --msh-red: #b83232;
-}
-
-.main-system-header .msh-topbar {
-  min-height: 82px;
-  padding: 10px clamp(18px, 4vw, 56px);
-  gap: clamp(18px, 3vw, 44px);
-}
-
-.main-system-header .msh-logo { height: 54px; }
-
-.main-system-header .msh-title {
-  color: var(--msh-navy);
-  font-family: "Poppins", "Inter", sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .1em;
-}
-
-.main-system-header .msh-search {
-  max-width: 620px;
-  height: 44px;
-  background: #f2f6fb;
-  border: 1px solid #dfe7f1;
-}
-
-.main-system-header .msh-search-btn {
-  padding: 0 20px;
-  background: var(--msh-navy);
-}
-
-.main-system-header .msh-nav { background: var(--msh-navy); }
-
-.main-system-header .msh-nav-list {
-  justify-content: flex-start;
-  max-width: 1240px;
-  gap: 30px;
-}
-
-.main-system-header .msh-nav-link {
-  height: 50px;
-  font-size: 12px;
-  letter-spacing: .02em;
-}
-
-.main-system-header .msh-nav-link.is-active::after {
-  height: 3px;
-  background: #f0b52c;
-}
-
-/* Phones: keep the header compact (the 820px grid layout already exists above) */
-@media (max-width: 820px) {
-  .main-system-header .msh-topbar { min-height: 0; padding: 10px 16px; }
-  .main-system-header .msh-logo { height: 44px; }
-  .main-system-header .msh-nav-list { max-width: none; gap: 24px; }
 }

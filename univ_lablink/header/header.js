@@ -277,7 +277,7 @@
   }
 
   function ensureStylesheet() {
-    var href = new URL("header.css", HEADER_DIR).href + "?v=6";
+    var href = new URL("header.css", HEADER_DIR).href + "?v=5";
     var exists = Array.prototype.some.call(
       document.querySelectorAll('link[rel="stylesheet"]'),
       function (l) { return l.href === href; }
