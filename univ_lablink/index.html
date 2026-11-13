@@ -23,20 +23,20 @@
   <main class="login-page">
     <section class="login-card" aria-labelledby="login-heading">
       <img class="login-card__logo" src="assets/lpu-logo-black.png" alt="LPU Cavite">
-      <h1 id="login-heading" class="login-card__subtitle">Log in with your LPU network account.</h1>
+      <h1 id="login-heading" class="login-card__subtitle">Log in to your Account</h1>
 
       <form class="login-form" action="#" method="post" novalidate>
 
         <!-- Email -->
         <div class="field">
-          <label class="field__label" for="email">LPU email</label>
+          <label class="field__label" for="email">User ID</label>
           <div class="field__control">
             <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="3" y="5" width="18" height="14" rx="2.5"/>
               <path d="M3.5 7.5l8.5 6 8.5-6"/>
             </svg>
-            <input class="field__input" type="text" id="email" name="email"
-                   placeholder="Example: (2025-2-00xxx)"
+          <input class="field__input" type="text" id="email" name="email"
+                   placeholder="e.g. 2025-2-00001 or LAB-00001"
                    autocomplete="username" required>
           </div>
         </div>
@@ -69,8 +69,9 @@
 
         <!-- Submit -->
         <button class="btn-login" type="submit">
-          Log in
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <span class="btn-login__label">Log In</span>
+          <span class="btn-login__spinner" aria-hidden="true" hidden></span>
+          <svg class="btn-login__arrow" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6"/>
           </svg>
         </button>
@@ -139,6 +140,11 @@
         </div>
       </div>
 
+    </div>
+
+    <div class="site-footer__legal">
+      <span>© Lyceum of the Philippines University Cavite. All rights reserved.</span>
+      <nav aria-label="Legal"><a href="#privacy">Privacy Notice</a><a href="#terms">Terms and Conditions</a><span>Academic Use Only</span></nav>
     </div>
   </footer>
 

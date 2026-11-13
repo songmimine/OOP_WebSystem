@@ -11,6 +11,17 @@
   var pwInput  = document.getElementById("password");
   var errorBox = document.getElementById("login-error");
   var submitBtn = form.querySelector(".btn-login");
+  var submitLabel = submitBtn.querySelector(".btn-login__label");
+  var submitSpinner = submitBtn.querySelector(".btn-login__spinner");
+  var isRedirecting = false;
+
+  function setLoading(isLoading) {
+    submitBtn.disabled = isLoading;
+    submitBtn.classList.toggle("is-loading", isLoading);
+    submitBtn.setAttribute("aria-busy", String(isLoading));
+    submitSpinner.hidden = !isLoading;
+    submitLabel.textContent = isLoading ? "Signing in…" : "Log In";
+  }
 
   function showError(message) {
     errorBox.textContent = message;
@@ -33,7 +44,7 @@
       return;
     }
 
-    submitBtn.disabled = true;
+    setLoading(true);
 
     fetch("/api/login", {
       method: "POST",
@@ -52,13 +63,14 @@
         }
 
         clearError();
+        isRedirecting = true;
         window.location.href = result.data.redirect; // admin -> admin side, user -> user side
       })
       .catch(function () {
         showError("Cannot reach the server. Make sure the Flask app is running.");
       })
       .finally(function () {
-        submitBtn.disabled = false;
+        if (!isRedirecting) setLoading(false);
       });
   });
 

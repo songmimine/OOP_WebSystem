@@ -475,3 +475,48 @@ body {
   border-radius: 9px;
   background: #102b52;
 }
+
+.my-requests .mr-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.my-requests .mr-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 194px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--mr-border);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.my-requests .mr-search svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.my-requests .mr-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--mr-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.my-requests .mr-card {
+  border-width: 2px;
+  border-left-width: 2px;
+  border-radius: 8px;
+  background: #f1f5f9;
+}

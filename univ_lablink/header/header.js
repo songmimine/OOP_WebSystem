@@ -289,7 +289,35 @@
     document.head.appendChild(link);
   }
 
+  function loadUserFooter() {
+    if (!document.body || document.getElementById("lablink-footer-mount")) return;
+
+    var footerMount = document.createElement("div");
+    footerMount.id = "lablink-footer-mount";
+    document.body.appendChild(footerMount);
+
+    var footerCss = document.createElement("link");
+    footerCss.rel = "stylesheet";
+    footerCss.href = new URL("../user_footer/user_footer.css", HEADER_DIR).href;
+    document.head.appendChild(footerCss);
+
+    fetch(new URL("../user_footer/user_footer.html", HEADER_DIR).href)
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
+      .then(function (html) {
+        footerMount.innerHTML = html;
+        resolvePaths(footerMount);
+      })
+      .catch(function (err) {
+        footerMount.remove();
+        console.error("[LabLink footer] Could not load shared footer:", err);
+      });
+  }
+
   function mount() {
+    loadUserFooter();
     var placeholder = document.getElementById("lablink-header");
 
     // Case 1: header markup is already inline on the page

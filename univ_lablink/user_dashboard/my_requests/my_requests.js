@@ -43,6 +43,7 @@
   var elSortBtn  = document.getElementById("mr-sort-button");
   var elSortMenu = document.getElementById("mr-sort-menu");
   var elSortLbl  = document.getElementById("mr-sort-label");
+  var elSearch   = document.getElementById("mr-search");
 
   // ---------- Helpers ----------
   // "2026-10-15" -> local Date (avoids the UTC off-by-one you get from new Date(string))
@@ -250,6 +251,11 @@
   // Here it filters the request list by ID, equipment or status.
   document.addEventListener("header:search", function (event) {
     state.query = (event.detail && event.detail.query) || "";
+    elSearch.value = state.query;
+    render();
+  });
+  elSearch.addEventListener("input", function () {
+    state.query = elSearch.value.trim();
     render();
   });
 

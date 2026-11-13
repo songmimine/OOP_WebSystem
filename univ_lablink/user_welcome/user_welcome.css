@@ -226,3 +226,21 @@ body {
     opacity: 1;
   }
 }
+
+.welcome__spinner {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin-top: 18px;
+  border: 4px solid #dbe8f5;
+  border-top-color: #2f83d5;
+  border-right-color: #2f83d5;
+  border-radius: 50%;
+  animation: welcome-spin .8s linear infinite;
+}
+
+@keyframes welcome-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome__spinner { animation: none; }
+}
