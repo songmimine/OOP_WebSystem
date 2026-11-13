@@ -4,6 +4,8 @@
   var form = document.getElementById("request-form");
   var tbody = document.getElementById("selected-items");
   var available = document.getElementById("available-items");
+  var availableSearch = document.getElementById("available-search");
+  var availableChips = document.querySelector(".request-inventory__chips");
   var noItems = document.getElementById("no-items");
   var toast = document.getElementById("portal-toast");
   var draft = store.draft();
@@ -53,11 +55,39 @@
         '<td><button class="portal-button portal-button--small portal-button--secondary" type="button" data-remove="' + esc(item.id) + '">Remove</button></td></tr>';
     }).join("");
     noItems.hidden = draft.length > 0;
-    available.innerHTML = inventory.filter(function (item) { return item.stock > 0; }).map(function (item) {
-      var added = !!selectedIds[item.id];
-      return '<article class="portal-card"><h3>' + esc(item.name) + '</h3><p class="portal-muted">' + esc(item.detail) + " · Available: " + item.stock + '</p>' +
-        '<button class="portal-button portal-button--small portal-button--blue" type="button" data-add="' + esc(item.id) + '">' + (added ? "Add one more" : "Add to request") + "</button></article>";
+    var categories = ["all"].concat(inventory.map(function (item) { return item.category; }).filter(function (value, index, list) { return list.indexOf(value) === index; }));
+    var activeCategory = availableChips.getAttribute("data-category") || "all";
+    if (categories.indexOf(activeCategory) === -1) activeCategory = "all";
+    availableChips.setAttribute("data-category", activeCategory);
+    availableChips.innerHTML = categories.map(function (value) {
+      return '<button type="button" class="portal-chip ' + (value === activeCategory ? "is-active" : "") + '" data-category="' + esc(value) + '" aria-pressed="' + (value === activeCategory) + '">' + (value === "all" ? "All" : esc(value)) + "</button>";
     }).join("");
+    var query = availableSearch.value.trim().toLowerCase();
+    available.innerHTML = inventory.filter(function (item) {
+      return item.stock > 0 && (activeCategory === "all" || item.category === activeCategory) &&
+        (item.name + " " + item.detail).toLowerCase().indexOf(query) !== -1;
+    }).map(function (item) {
+      var added = !!selectedIds[item.id];
+      return '<article class="request-inventory__item">' +
+        '<span class="request-inventory__image">' + inventoryImage(item) + '</span>' +
+        '<span class="request-inventory__copy"><strong>' + esc(item.name) + '</strong><small>Stock: ' + esc(item.stock) + '</small></span>' +
+        '<button class="request-qty" type="button" data-add="' + esc(item.id) + '" aria-label="' + (added ? "Add another " : "Add ") + esc(item.name) + '">+</button>' +
+        '<output>' + (selectedQty(item.id) || 0) + '</output>' +
+        '<button class="request-qty" type="button" data-remove-one="' + esc(item.id) + '" aria-label="Remove one ' + esc(item.name) + '">−</button>' +
+        "</article>";
+    }).join("");
+  }
+
+  function inventoryImage(item) {
+    var text = (item.name + " " + item.detail).toLowerCase();
+    var root = "../../assets/";
+    var path = text.indexOf("beaker") !== -1 ? "beaker-250ml.png" :
+      text.indexOf("weigh") !== -1 || text.indexOf("scale") !== -1 ? "weighing-scale.png" :
+      text.indexOf("test tube holder") !== -1 ? "test-tube-holder.png" :
+      text.indexOf("test tube") !== -1 ? "test-tubes.png" :
+      text.indexOf("hydrochloric") !== -1 ? "hydrochloric-acid.png" :
+      text.indexOf("bunsen") !== -1 ? "bunsen-burner.png" : "";
+    return path ? '<img src="' + root + path + '" alt="" loading="lazy">' : '<span aria-hidden="true">⌁</span>';
   }
 
   function showExisting() {
@@ -86,8 +116,15 @@
     changeQty(button.getAttribute("data-id") || button.getAttribute("data-remove"), button.hasAttribute("data-remove") ? -999 : Number(button.getAttribute("data-change")));
   });
   available.addEventListener("click", function (event) {
-    var button = event.target.closest("[data-add]");
-    if (button) changeQty(button.getAttribute("data-add"), 1);
+    var button = event.target.closest("[data-add], [data-remove-one]");
+    if (button) changeQty(button.getAttribute("data-add") || button.getAttribute("data-remove-one"), button.hasAttribute("data-add") ? 1 : -1);
+  });
+  availableSearch.addEventListener("input", render);
+  availableChips.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-category]");
+    if (!button) return;
+    availableChips.setAttribute("data-category", button.getAttribute("data-category"));
+    render();
   });
   form.addEventListener("submit", function (event) {
     event.preventDefault();
