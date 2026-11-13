@@ -1,0 +1,53 @@
+<header class="admin-header" data-admin-header>
+  <div class="ah-topbar">
+    <div class="ah-brand">
+      <a class="ah-brand__link" data-path="admin_dashboard/admin_dashboard.html" href="#" aria-label="University LabLink admin dashboard">
+        <img class="ah-brand__logo" data-src="assets/lpu-logo-black.png" alt="Lyceum of the Philippines University Cavite">
+      </a>
+      <span class="ah-brand__divider" aria-hidden="true"></span>
+      <span class="ah-brand__title">Laboratory<br>Equipment System</span>
+    </div>
+    <form class="ah-search" data-ah-search role="search">
+      <label class="sr-only" for="ah-search-input">Search this page</label>
+      <svg class="ah-search__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg>
+      <input class="ah-search__input" data-ah-search-input id="ah-search-input" type="search" placeholder="Search equipment, requests, or ID..." autocomplete="off">
+      <button class="ah-search__btn" type="submit"><span>Search</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></button>
+    </form>
+    <div class="ah-utility">
+      <time class="ah-datetime" data-ah-datetime>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>
+        <span data-ah-date></span><span class="ah-datetime__separator">|</span><span data-ah-time></span>
+      </time>
+      <div class="ah-notifications">
+        <button class="ah-bell" data-ah-bell type="button" aria-label="Notifications" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <span class="ah-bell__badge" data-ah-badge hidden></span>
+        </button>
+        <section class="ah-notification-panel" data-ah-panel hidden aria-label="New borrowing requests">
+          <strong>New requests</strong>
+          <ul data-ah-notification-list></ul>
+          <p data-ah-notification-empty hidden>No new requests need attention.</p>
+        </section>
+      </div>
+      <div class="ah-user">
+        <button class="ah-user__button" data-ah-profile type="button" aria-expanded="false">
+          <span class="ah-user__avatar" data-ah-avatar aria-hidden="true">LS</span>
+          <span class="ah-user__meta"><strong class="ah-user__name" data-ah-name>Laboratory Staff</strong><small>Administrator</small></span>
+        </button>
+        <div class="ah-profile-menu" data-ah-profile-menu hidden>
+          <a data-path="admin_dashboard/settings.html" href="#">Settings</a>
+          <a href="/logout">Sign out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="ah-nav" aria-label="Administrator navigation">
+    <ul class="ah-nav__list">
+      <li><a class="ah-nav__link" data-nav="dashboard" data-path="admin_dashboard/admin_dashboard.html" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg><span>Admin Dashboard</span></a></li>
+      <li><a class="ah-nav__link" data-nav="inventory" data-path="admin_dashboard/inventory_records/inventory_records.html" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3M7 16h10"></path></svg><span>Equipment Management</span></a></li>
+      <li><a class="ah-nav__link" data-nav="requests" data-path="admin_dashboard/borrow_requests/borrow_requests.html" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"></path></svg><span>Borrowing Requests</span></a></li>
+      <li><a class="ah-nav__link" data-nav="returns" data-path="admin_dashboard/return_confirmation/return_confirmation.html" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"></path></svg><span>Return Management</span></a></li>
+      <li><a class="ah-nav__link" data-nav="records" data-path="admin_dashboard/records_history.html" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="14" height="16" rx="2"></rect><path d="M8 8h6M8 12h6M8 16h4M18 7h2v13"></path></svg><span>Records &amp; History</span></a></li>
+    </ul>
+  </nav>
+</header>

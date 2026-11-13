@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Requests | LPU Cavite Laboratory Equipment System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Shared global header styles (header.js would also load these if missing) -->
+  <link rel="stylesheet" href="../../header/header.css">
+  <link rel="stylesheet" href="my_requests.css">
+</head>
+<body>
+
+  <!-- ============ SHARED HEADER (injected by header/header.js) ============ -->
+  <div id="lablink-header" data-active="requests" data-count="0"></div>
+  <script src="../../header/header.js"></script>
+
+  <!-- ============ PAGE CONTENT ============ -->
+  <main class="my-requests" id="my-requests">
+    <div class="my-requests__inner">
+
+      <!-- Title -->
+      <div class="mr-heading">
+        <h1 class="mr-heading__title">My Requests</h1>
+        <p class="mr-heading__subtitle">Track every borrowing request you have submitted.</p>
+      </div>
+
+      <!-- Filters + sort -->
+      <div class="mr-toolbar" id="mr-toolbar">
+        <div class="mr-filters" role="group" aria-label="Filter requests by status">
+          <button class="mr-pill is-active" type="button" data-filter="all"      aria-pressed="true">All</button>
+          <button class="mr-pill"           type="button" data-filter="pending"  aria-pressed="false">Pending</button>
+          <button class="mr-pill"           type="button" data-filter="approved" aria-pressed="false">Approved</button>
+          <button class="mr-pill"           type="button" data-filter="rejected" aria-pressed="false">Rejected</button>
+          <button class="mr-pill"           type="button" data-filter="returned" aria-pressed="false">Returned</button>
+        </div>
+
+        <div class="mr-sort">
+          <button class="mr-sort__button" type="button" id="mr-sort-button"
+                  aria-haspopup="listbox" aria-expanded="false" aria-controls="mr-sort-menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h10M4 12h7M4 18h4"/>
+              <path d="M18 5v14M14.5 15.5L18 19l3.5-3.5"/>
+            </svg>
+            <span id="mr-sort-label">Sort: Newest to Oldest</span>
+          </button>
+          <ul class="mr-sort__menu" id="mr-sort-menu" role="listbox" hidden>
+            <li role="option" tabindex="0" data-sort="newest" aria-selected="true">Newest to Oldest</li>
+            <li role="option" tabindex="0" data-sort="oldest" aria-selected="false">Oldest to Newest</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- STATE A: empty view (no requests have been made) -->
+      <section class="mr-empty" id="mr-empty" hidden aria-live="polite">
+        <svg class="mr-empty__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M24 6h16M26 6v18L10.5 50.5A4 4 0 0 0 14 56.5h36a4 4 0 0 0 3.5-6L38 24V6"/>
+          <path d="M17 41h30"/>
+        </svg>
+        <h2 class="mr-empty__title">No Requests Currently Made</h2>
+        <p class="mr-empty__text">Submit your first borrowing request to see it listed here.</p>
+        <a class="mr-button" href="../equipment_catalog/equipment_catalog.html">Browse Equipment List</a>
+      </section>
+
+      <!-- STATE B: populated view (request history) -->
+      <ul class="mr-list" id="mr-list" hidden></ul>
+
+      <!-- Shown when requests exist but the chosen filter matches none of them -->
+      <p class="mr-no-match" id="mr-no-match" hidden>No requests match your search or filter.</p>
+
+    </div>
+  </main>
+
+  <!-- portal-store.js saves requests; my_requests.js draws them -->
+  <script src="../../portal-store.js"></script>
+  <script src="my_requests.js"></script>
+</body>
+</html>

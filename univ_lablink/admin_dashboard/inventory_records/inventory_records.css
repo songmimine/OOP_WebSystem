@@ -1,0 +1,30 @@
+.equipment-form-card { padding: 26px 30px 30px; }
+.equipment-form-card h2 { font-size: 20px; }
+.equipment-form { margin-top: 24px; gap: 20px 24px; }
+.equipment-form .portal-input, .equipment-form .portal-select { min-height: 46px; }
+.equipment-form .portal-label { margin-bottom: 8px; color: #263a5b; font-size: 13px; font-weight: 650; }
+.equipment-detail-unit { display: grid; grid-template-columns: minmax(0, 1fr); }
+.equipment-borrow-status { cursor: pointer; }
+.equipment-image-hint { color: var(--portal-muted); font-size: 11px; font-weight: 400; }
+.equipment-form .equipment-image-input { min-height: 46px; padding: 7px; color: var(--portal-muted); background: #f8fafd; }
+.equipment-form .equipment-image-input::file-selector-button { margin-right: 12px; padding: 8px 13px; border: 0; border-radius: 6px; color: #fff; background: var(--portal-navy); font: inherit; font-weight: 600; cursor: pointer; }
+.equipment-form-actions { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.equipment-form-actions .portal-button { min-width: 220px; min-height: 46px; }
+.equipment-search { position: relative; display: block; flex: 1 1 260px; max-width: 460px; }
+.equipment-search svg { position: absolute; top: 50%; left: 14px; width: 18px; height: 18px; transform: translateY(-50%); fill: none; stroke: #69758a; stroke-width: 1.8; pointer-events: none; }
+.equipment-search .portal-input { max-width: none; padding-left: 52px; }
+.equipment-table th:nth-child(2), .equipment-table td:nth-child(2),
+.equipment-table th:nth-child(n+3):nth-child(-n+7), .equipment-table td:nth-child(n+3):nth-child(-n+7) { text-align: center; }
+.equipment-category-location { display: inline-grid; justify-items: center; text-align: center; }
+.equipment-table { min-width: 930px; }
+.equipment-preview { width: 52px; height: 44px; object-fit: cover; border-radius: 6px; background: #edf4ff; }
+.equipment-name { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+.equipment-image-empty { display: grid; width: 52px; height: 44px; place-items: center; border-radius: 6px; background: #edf4ff; color: #69758a; font-size: 10px; }
+.equipment-action-buttons { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.equipment-filter-empty { padding: 18px; color: #69758a; }
+
+@media (max-width: 650px) {
+  .equipment-form-card { padding: 22px 18px; }
+  .equipment-form-actions { align-items: stretch; flex-direction: column; }
+  .equipment-form-actions .portal-button { width: 100%; }
+}

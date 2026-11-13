@@ -1,0 +1,228 @@
+:root {
+  --header-bg: #04132b;
+  --icon-fill: #666666;
+  --icon-gray: #d9d9d9;
+  --fade-duration: 1.2s;
+  --rise-first: 1.5s;    /* bottom -> middle */
+  --pause-duration: 2s;  /* rest in the middle */
+  --rise-second: 0.3s;   /* middle -> top (faster) */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", sans-serif;
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 72px;
+  padding: 12px 24px;
+  background: var(--header-bg);
+}
+
+.header__logo {
+  height: 46px;
+  width: auto;
+}
+
+.header__divider {
+  width: 2px;
+  height: 38px;
+  background: #fff;
+}
+
+.header__title {
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Main ---------- */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Phase 1: fade in (0 -> 1 over 1.2s) */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn var(--fade-duration) ease forwards;
+}
+
+.welcome__title {
+  margin-top: 18px;
+  font-size: 2.3rem;
+  font-weight: 700;
+}
+
+.welcome__subtitle {
+  margin-top: 10px;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+/* ---------- Lab icon ---------- */
+.lab-icon {
+  position: relative;
+  width: 110px;
+  height: 132px;
+}
+
+.lab-icon__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lab-icon__glass {
+  color: var(--icon-gray);
+}
+
+/* Phase 2: the liquid rises inside the flask, starts only after the fade-in finishes.
+   Units below are SVG user units (the viewBox is 100 x 120). */
+.lab-icon__liquid {
+  color: var(--icon-fill);
+}
+
+/* Whole water body rises from below the flask to the very top of the neck */
+.liquid__rise {
+  transform: translateY(125px);
+  animation: riseUp calc(var(--rise-first) + var(--pause-duration) + var(--rise-second)) ease-in-out var(--fade-duration) forwards;
+}
+
+/* Wave surfaces slide sideways forever, giving the water its ripple */
+.liquid__wave {
+  animation: waveFlow 1.6s linear infinite;
+}
+
+.liquid__wave--back {
+  opacity: 0.45;
+  animation: waveFlowReverse 2.4s linear infinite;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Total 3.8s = 1.5s rise to the middle, 2s pause, 0.3s rise to the top.
+   If you change any of the three durations, update the percentages:
+   mid-start = first / total, mid-end = (first + pause) / total. */
+@keyframes riseUp {
+  0%       { transform: translateY(125px); }
+  39.47%   { transform: translateY(68px); }  /* reaches the middle of the flask */
+  92.11%   { transform: translateY(68px); }  /* 2s pause */
+  100%     { transform: translateY(5px); }   /* very top of the neck */
+}
+
+/* One wave period is 50 units, so shifting by 50 loops seamlessly */
+@keyframes waveFlow {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50px); }
+}
+
+@keyframes waveFlowReverse {
+  from { transform: translateX(-50px); }
+  to   { transform: translateX(0); }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 480px) {
+  .header { padding: 10px 14px; gap: 12px; }
+  .header__logo { height: 38px; }
+  .header__title { font-size: 11px; }
+  .welcome__title { font-size: 1.8rem; }
+  .welcome__subtitle { font-size: 1rem; }
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 45%, #e8f2ff 0, transparent 34%),
+    #f3f6fa;
+}
+
+.header {
+  min-height: 82px;
+  padding: 12px clamp(20px, 5vw, 72px);
+  background: #071b38;
+}
+
+.header__title {
+  letter-spacing: .12em;
+}
+
+.main {
+  position: relative;
+  overflow: hidden;
+}
+
+.main::before,
+.main::after {
+  position: absolute;
+  content: "";
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(29,102,193,.15);
+  border-radius: 50%;
+}
+
+.main::before { transform: translate(-230px, -90px); }
+.main::after { transform: translate(230px, 90px); }
+
+.welcome {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome__title {
+  color: #102b52;
+  letter-spacing: -.05em;
+}
+
+.welcome__subtitle {
+  color: #61708a;
+}
+
+.lab-icon {
+  filter: drop-shadow(0 14px 18px rgba(16,43,82,.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome,
+  .liquid__rise,
+  .liquid__wave,
+  .liquid__wave--back {
+    animation: none;
+  }
+
+  .welcome {
+    opacity: 1;
+  }
+}

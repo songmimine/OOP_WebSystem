@@ -1,0 +1,131 @@
+:root {
+  --header-bg: #04132b;
+  --molecule-gray: #d4d7dd;
+  --molecule-fill: #1b3560;
+  --fade-duration: 1.2s;
+  --fill-duration: 3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", sans-serif;
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 72px;
+  padding: 12px 24px;
+  background: var(--header-bg);
+}
+
+.header__logo {
+  height: 46px;
+  width: auto;
+}
+
+.header__divider {
+  width: 2px;
+  height: 38px;
+  background: #fff;
+}
+
+.header__title {
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Main ---------- */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Fade in (0 -> 1) */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn var(--fade-duration) ease forwards;
+}
+
+.welcome__title {
+  margin-top: 20px;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.welcome__subtitle {
+  margin-top: 8px;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+/* ---------- Molecule icon ---------- */
+.molecule {
+  position: relative;
+  width: 130px;
+  height: 103px; /* keeps the 120 x 95 shape ratio */
+}
+
+.molecule__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.molecule__base {
+  color: var(--molecule-gray);
+}
+
+/* Phase 2: dark blue fills the gray molecule from bottom to top,
+   starting only after the fade-in has finished */
+.molecule__fill {
+  color: var(--molecule-fill);
+  clip-path: inset(100% 0 0 0);
+  animation: fillUp var(--fill-duration) ease-in-out var(--fade-duration) forwards;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fillUp {
+  from { clip-path: inset(100% 0 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 480px) {
+  .header { padding: 10px 14px; gap: 12px; }
+  .header__logo { height: 38px; }
+  .header__title { font-size: 11px; }
+  .welcome__title { font-size: 1.8rem; }
+  .welcome__subtitle { font-size: 1rem; }
+}

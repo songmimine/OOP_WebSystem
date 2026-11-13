@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Equipment Management | University LabLink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../portal-pages.css"><link rel="stylesheet" href="inventory_records.css">
+</head>
+<body class="admin-portal-page">
+  <div id="admin-header-mount" data-active="inventory"></div>
+  <main class="admin-content">
+    <div class="portal-heading"><div><p class="portal-kicker">Inventory / Management</p><h1>Equipment Management</h1><p>Maintain equipment details and quantities shared with the user catalog.</p></div></div>
+    <section class="portal-card equipment-form-card" aria-labelledby="equipment-form-title">
+      <h2 id="equipment-form-title">Add New Equipment</h2>
+      <form class="portal-form-grid equipment-form" id="equipment-form" enctype="multipart/form-data">
+        <label class="portal-field"><span class="portal-label">Item name</span><input class="portal-input" name="name" required maxlength="120" placeholder="Enter equipment name"></label>
+        <div class="portal-field">
+          <span class="portal-label">Details / Model / Unit</span>
+          <div class="equipment-detail-unit">
+            <input class="portal-input" name="detail" maxlength="240" aria-label="Details / Model" placeholder="Details or model">
+            <input type="hidden" name="unit" value="units">
+          </div>
+        </div>
+        <label class="portal-field"><span class="portal-label">Category</span><input class="portal-input" name="category" list="equipment-categories" required maxlength="80" placeholder="Select or enter a category"><datalist id="equipment-categories"><option>Equipment &amp; Machines</option><option>Glassware &amp; Containers</option><option>Chemicals &amp; Reagents</option></datalist></label>
+        <label class="portal-field"><span class="portal-label">Location</span><input class="portal-input" name="location" required maxlength="120" placeholder="Enter storage location"></label>
+        <label class="portal-field"><span class="portal-label">Quantity in stock</span><input class="portal-input" name="stock" type="number" min="0" step="1" value="1" required></label>
+        <label class="portal-field"><span class="portal-label">Borrow Status</span><select class="portal-select equipment-borrow-status" id="equipment-borrow-status" name="borrowStatus" aria-label="Borrow status"><option value="Available">Available</option><option value="Unavailable">Unavailable</option></select></label>
+        <label class="portal-field portal-field--wide"><span class="portal-label">Equipment image <span class="equipment-image-hint">(PNG, JPEG, GIF, or WebP; up to 5 MB)</span></span><input class="portal-input equipment-image-input" name="image" type="file" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+        <div class="equipment-form-actions portal-field--wide"><button class="portal-button" id="equipment-submit" type="submit">Add New Equipment</button><button class="portal-button portal-button--secondary" id="equipment-cancel" type="button" hidden>Cancel edit</button></div>
+      </form>
+    </section>
+    <section class="portal-card" aria-labelledby="equipment-table-title">
+      <div class="admin-section-heading"><div><h2 id="equipment-table-title">Equipment Inventory</h2><p class="portal-muted">Borrowed quantity is calculated from active transactions.</p></div></div>
+      <div class="portal-toolbar"><label class="equipment-search"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input class="portal-input" id="equipment-search" type="search" aria-label="Search equipment" placeholder="Search equipment, category, or location"></label><select class="portal-select" id="equipment-category-filter" aria-label="Filter by category"><option value="">All categories</option></select></div>
+      <div class="portal-table-wrap"><table class="portal-table equipment-table"><thead><tr><th>Equipment</th><th>Category / Location</th><th>Total</th><th>Available</th><th>Borrowed</th><th>Unavailable</th><th>Status</th><th>Actions</th></tr></thead><tbody id="equipment-rows"><tr><td colspan="8">Loading inventory…</td></tr></tbody></table></div>
+    </section>
+    <div id="admin-footer-mount"></div>
+  </main>
+  <p class="portal-toast" id="admin-toast" role="status" hidden></p>
+  <script src="../admin_pages.js"></script><script src="../../admin_header/admin_header.js"></script><script src="../../admin_footer/admin_footer.js"></script><script src="inventory_records.js"></script>
+</body>
+</html>
