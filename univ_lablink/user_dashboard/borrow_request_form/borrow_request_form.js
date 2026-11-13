@@ -52,7 +52,7 @@
       return "<tr><td>" + esc(item.name) + ' <span class="portal-muted">' + esc(item.detail) + "</span></td><td>" + item.stock +
         '</td><td><span class="portal-qty"><button type="button" aria-label="Remove one ' + esc(item.name) + '" data-change="-1" data-id="' + esc(item.id) + '">−</button>' +
         "<output>" + entry.qty + '</output><button type="button" aria-label="Add one ' + esc(item.name) + '" data-change="1" data-id="' + esc(item.id) + '">+</button></span></td>' +
-        '<td><button class="portal-button portal-button--small portal-button--secondary" type="button" data-remove="' + esc(item.id) + '">Remove</button></td></tr>';
+        '<td><button class="portal-button portal-button--small portal-button--danger" type="button" data-remove="' + esc(item.id) + '">Remove</button></td></tr>';
     }).join("");
     noItems.hidden = draft.length > 0;
     var categories = ["all"].concat(inventory.map(function (item) { return item.category; }).filter(function (value, index, list) { return list.indexOf(value) === index; }));

@@ -659,3 +659,16 @@
     border-radius: 14px;
   }
 }
+
+/* Destructive actions stay red and readable, including on hover. */
+.portal-button--danger {
+  color: #fff;
+  background: var(--portal-red);
+  border-color: transparent;
+}
+
+.portal-button--danger:hover {
+  color: #fff;
+  background: #992a2a;
+  border-color: transparent;
+}
