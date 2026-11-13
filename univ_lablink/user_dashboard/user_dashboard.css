@@ -99,12 +99,13 @@
 /* ---------- Layout ---------- */
 .dash-layout {
   display: grid;
-  grid-template-columns: clamp(188px, 18vw, 244px) minmax(0, 1fr);
-  min-height: calc(100vh - 120px);
+  grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr);
+  min-height: calc(100dvh - 120px);
 }
 
 /* ---------- Sidebar ---------- */
 .dash-sidebar {
+  min-height: calc(100dvh - 120px);
   padding: 20px 12px;
   border-right: 1px solid var(--d-line);
   background: #ffffff;
@@ -664,10 +665,10 @@
 .dash-notif {
   position: fixed;
   right: 24px;
-  bottom: 100px;
+  bottom: calc(24px + 64px + 16px);
   z-index: 950;
   width: min(380px, calc(100vw - 32px));
-  max-height: min(60vh, 460px);
+  max-height: min(calc(100dvh - 136px), 460px);
   overflow-y: auto;
   background: #ffffff;
   border: 1px solid var(--d-line);
@@ -836,7 +837,8 @@
 
   .dash-notif {
     right: 16px;
-    bottom: 92px;
+    bottom: calc(16px + 64px + 16px);
+    max-height: min(calc(100dvh - 112px), 460px);
   }
 }
 
@@ -954,7 +956,7 @@
 }
 
 .dash-layout {
-  grid-template-columns: clamp(188px, 18vw, 244px) minmax(0, 1fr);
+  grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr);
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -1079,6 +1081,7 @@
   }
 
   .dash-sidebar {
+    min-height: auto;
     padding: 10px 16px;
     border-right: 0;
     border-bottom: 1px solid #dce5f0;
@@ -1102,12 +1105,18 @@
 }
 
 @media (max-width: 520px) {
-  .dash-sidebar { padding: 8px 12px; }
+  .dash-sidebar { min-height: auto; padding: 8px 12px; }
   .dash-side-link { gap: 8px; padding: 8px 10px; font-size: 12px; }
   .dash-side-link .dash-icon { width: 17px; height: 17px; }
   .dash-main { padding: 22px 14px 100px; }
   .dash-title { font-size: clamp(25px, 8vw, 34px); }
   .dash-stats { grid-template-columns: minmax(0, 1fr); }
   .dash-card { padding: 16px; }
-  .dash-notif { left: 12px; right: 12px; width: auto; }
+  .dash-notif {
+    left: 12px;
+    right: 12px;
+    bottom: calc(16px + 64px + 12px);
+    width: auto;
+    max-height: min(calc(100dvh - 104px), 460px);
+  }
 }
