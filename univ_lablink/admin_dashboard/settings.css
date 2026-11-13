@@ -1,8 +1,0 @@
-.settings-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-.settings-form .portal-field--wide { grid-column: 1 / -1; }
-.settings-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.settings-actions .portal-note { margin: 0; }
-@media (max-width: 650px) {
-  .settings-form { grid-template-columns: 1fr; }
-  .settings-form .portal-field--wide { grid-column: auto; }
-}

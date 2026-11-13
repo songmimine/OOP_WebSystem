@@ -1,8 +1,0 @@
-.request-table { min-width: 1050px; }
-.request-new { display: inline-block; margin-top: 5px; padding: 2px 6px; border-radius: 999px; background: #fee8e8; color: #a52b23; font-size: 10px; font-weight: 700; }
-.request-actions { display: flex; gap: 6px; flex-wrap: wrap; min-width: 160px; }
-.request-dialog { width: min(660px, calc(100vw - 28px)); max-height: min(82vh, 760px); overflow: auto; border: 0; }
-.request-dialog::backdrop { background: rgba(15,29,52,.52); }
-.request-dialog .portal-heading { align-items: flex-start; }
-.request-details-list { display: grid; gap: 10px; margin: 18px 0; padding: 0; list-style: none; }
-.request-details-list li { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
