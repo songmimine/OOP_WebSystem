@@ -20,7 +20,7 @@
           window.location.assign("/index.html");
           throw new Error(body.message || "Your session has expired. Please sign in again.");
         }
-        if (!response.ok) throw new Error(body.message || "The server could not complete this request.");
+        if (!response.ok) throw new Error(body.message || "The server could not complete this request. Please try again.");
         return body;
       });
     });

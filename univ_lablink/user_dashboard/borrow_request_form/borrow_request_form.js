@@ -138,10 +138,23 @@
       items: draft
     }).then(function (request) {
       document.getElementById("success-reference").textContent = request.id;
-      document.getElementById("success-modal").hidden = false;
+      var modal = document.getElementById("success-modal");
+      modal.hidden = false;
+      var firstAction = modal.querySelector("a.portal-button");
+      if (firstAction) firstAction.focus();
     }).catch(function (error) { notify(error.message, true); }).finally(function () { button.disabled = false; });
   });
-  document.getElementById("close-success").addEventListener("click", function () { document.getElementById("success-modal").hidden = true; });
+  document.getElementById("close-success").addEventListener("click", closeSuccess);
+  document.getElementById("success-modal").addEventListener("click", function (event) {
+    if (event.target === document.getElementById("success-modal")) closeSuccess();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !document.getElementById("success-modal").hidden) closeSuccess();
+  });
+  function closeSuccess() {
+    document.getElementById("success-modal").hidden = true;
+    document.getElementById("submit-request").focus();
+  }
   window.addEventListener("lablink:data-changed", render);
 
   store.ready.then(function () {

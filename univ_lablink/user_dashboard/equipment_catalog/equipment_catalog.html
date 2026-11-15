@@ -11,20 +11,21 @@
   <link rel="stylesheet" href="equipment_catalog.css">
 </head>
 <body class="portal-page catalog-page">
+  <a class="portal-skip" href="#portal-main">Skip to main content</a>
   <div id="lablink-header" data-active="catalog"></div>
   <script src="../../header/header.js"></script>
-  <main class="portal-main">
+  <main class="portal-main" id="portal-main" tabindex="-1">
     <div class="portal-heading">
       <div>
         <p class="portal-kicker">Laboratory Inventory List</p>
-        <h1>Equipments Catalog</h1>
+        <h1>Equipment Catalog</h1>
         <p>Explore laboratory equipment, formulas, and chemicals.</p>
       </div>
     </div>
     <div class="catalog-toolbar">
       <label class="catalog-search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.2 4.2"></path></svg>
-        <input id="catalog-search" type="search" placeholder="Search by item name..." aria-label="Search equipment">
+        <input id="catalog-search" type="search" placeholder="Search by item name…" aria-label="Search equipment">
       </label>
       <label class="catalog-filter" aria-label="Filter by category">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 11h10M10 16h4"></path><path d="m5 3-2 3 2 3"></path></svg>
