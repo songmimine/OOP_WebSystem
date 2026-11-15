@@ -15,24 +15,24 @@
   <main class="portal-main">
     <div class="portal-heading">
       <div>
-        <p class="portal-kicker">Inventory / Return Section</p>
-        <h1>User Return Management</h1>
-        <p>Review borrowed equipment, request extensions, and follow return inspection status.</p>
+        <p class="portal-kicker">Equipment / Returns</p>
+        <h1>Return equipment</h1>
+        <p>Submit returns and ask for more time.</p>
       </div>
-      <a class="portal-button portal-button--secondary" href="../currently_borrowing/currently_borrowing.html">Currently borrowing</a>
+      <a class="portal-button portal-button--secondary" href="../currently_borrowing/currently_borrowing.html">View borrowed items</a>
     </div>
-    <div class="portal-note">Return equipment to the lab custodian for a physical check. A staff member will confirm the return in the demo admin area.</div>
+    <div class="portal-note">Hand the equipment to the lab custodian. A staff member confirms the return after checking it.</div>
     <section class="portal-list" id="return-list" style="margin-top:20px"></section>
     <div class="portal-empty" id="return-empty" hidden>
-      <h2>No equipment to return</h2>
-      <p>Approved or borrowed items will appear here. You can browse inventory to make a request.</p>
+      <h2>Nothing to return</h2>
+      <p>Items you borrow appear here. Browse the catalog to make a request.</p>
       <a class="portal-button" href="../equipment_catalog/equipment_catalog.html">Browse equipment</a>
     </div>
   </main>
   <div class="portal-modal-backdrop" id="extension-modal" hidden>
     <section class="portal-modal" role="dialog" aria-modal="true" aria-labelledby="extension-title">
-      <h2 id="extension-title">Request a return extension</h2>
-      <p>Send a proposed return date and reason to the laboratory staff.</p>
+      <h2 id="extension-title">Request an extension</h2>
+      <p>Send a new return date and a reason to laboratory staff.</p>
       <label class="portal-field"><span class="portal-label">Reason for extension</span><textarea class="portal-textarea" id="extension-reason" required placeholder="Explain why you need more time"></textarea></label>
       <label class="portal-field" style="margin-top:14px"><span class="portal-label">Proposed new return date</span><input class="portal-input" id="extension-date" type="date" required></label>
       <p class="portal-note" id="extension-message" role="status" hidden></p>

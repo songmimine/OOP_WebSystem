@@ -23,7 +23,7 @@
     <!-- Sidebar -->
     <aside class="dash-sidebar">
       <nav aria-labelledby="dash-menu-label">
-        <p class="dash-sidebar-label" id="dash-menu-label">Main menu</p>
+        <p class="dash-sidebar-label" id="dash-menu-label">Dashboard sections</p>
         <ul class="dash-side-list">
           <li>
             <a class="dash-side-link is-active" href="user_dashboard.html" aria-current="page">
@@ -65,7 +65,7 @@
           <li>
             <a class="dash-side-link" href="return_equipment/return_equipment.html">
               <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"/></svg>
-              <span>Return Management</span>
+              <span>Return equipment</span>
             </a>
           </li>
         </ul>
@@ -77,13 +77,13 @@
 
       <nav class="dash-crumb" aria-label="Breadcrumb">
         <ol>
-          <li>User Dashboard</li>
+          <li>Dashboard</li>
           <li aria-current="page">Overview</li>
         </ol>
       </nav>
 
       <h1 class="dash-title">Good day, <span id="dash-name">User</span>!</h1>
-      <p class="dash-sub">Manage your laboratory equipment and upcoming schedules.</p>
+      <p class="dash-sub">Your borrow requests, due dates, and returns.</p>
 
       <!-- Summary cards -->
       <section class="dash-stats-wrap" aria-label="Summary">
@@ -115,7 +115,7 @@
             <h2 class="dash-h2" id="req-title">Active Borrow Requests</h2>
             <a class="dash-btn" href="equipment_catalog/equipment_catalog.html">
               <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-              <span>Add Request</span>
+              <span>New request</span>
             </a>
           </div>
 
@@ -126,8 +126,8 @@
               <rect x="4" y="3.5" width="16" height="17" rx="2"></rect>
               <path d="M8 9h8M8 13h8M8 17h4"></path>
             </svg>
-            <p class="dash-empty-title">No borrow requests yet</p>
-            <p class="dash-empty-text">When you request laboratory equipment, your requests will show up here.</p>
+            <p class="dash-empty-title">No requests yet</p>
+            <p class="dash-empty-text">Pick equipment in the catalog to start one.</p>
           </div>
 
           <a class="dash-more" id="req-more" href="my_requests/my_requests.html" hidden>View all requests</a>
@@ -176,7 +176,7 @@
             <h2 class="dash-h3" id="dl-title">Upcoming Deadlines</h2>
             <ul class="dash-dl-list" id="dl-list" hidden></ul>
             <p class="dash-dl-empty" id="dl-empty">
-              No upcoming deadlines. Items to borrow or return will appear here.
+              Nothing due soon and nothing overdue.
             </p>
           </section>
 
@@ -185,9 +185,9 @@
 
       <a class="dash-catalog-promo" href="equipment_catalog/equipment_catalog.html">
         <span class="dash-catalog-promo__copy">
-          <strong>Browse for more items and equipment</strong>
-          <span>Find available laboratory equipment before you submit a request.</span>
-          <span class="dash-catalog-promo__action">Go to Equipment Catalog <span aria-hidden="true">→</span></span>
+          <strong>Need more equipment?</strong>
+          <span>Check what is in stock before you submit a request.</span>
+          <span class="dash-catalog-promo__action">Browse equipment <span aria-hidden="true">→</span></span>
         </span>
         <img src="../assets/lab-hero.png" alt="Laboratory workbench with microscopes and equipment" loading="lazy">
       </a>
@@ -220,7 +220,7 @@
       </button>
     </div>
     <ul class="dash-notif-list" id="notif-list" hidden></ul>
-    <p class="dash-notif-empty" id="notif-empty">You're all caught up. New notifications will appear here.</p>
+    <p class="dash-notif-empty" id="notif-empty">No notifications yet.</p>
   </section>
 
   <p class="dash-sr" id="notif-live" role="status" aria-live="polite"></p>

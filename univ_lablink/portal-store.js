@@ -47,7 +47,7 @@
       var value = JSON.parse(localStorage.getItem(draftKey) || "[]");
       return Array.isArray(value) ? value : [];
     } catch (error) {
-      throw new Error("The saved request draft is invalid. Clear this site's saved request draft and try again.");
+      throw new Error("Could not read your saved equipment selection. Clear this site's saved data, then add items again.");
     }
   }
 

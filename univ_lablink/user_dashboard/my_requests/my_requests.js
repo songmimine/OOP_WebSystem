@@ -9,19 +9,19 @@
   "use strict";
 
   var STATUS_LABELS = {
-    pending:  "Pending Approval",
+    pending:  "Pending approval",
     approved: "Approved",
     active:   "Borrowed",
     overdue:  "Overdue",
-    partially_returned: "Partially Returned",
-    return_requested: "Return Requested",
+    partially_returned: "Partially returned",
+    return_requested: "Return submitted",
     returned: "Returned",
     rejected: "Rejected"
   };
 
   var SORT_LABELS = {
-    newest: "Sort: Newest to Oldest",
-    oldest: "Sort: Oldest to Newest"
+    newest: "Sort: Newest first",
+    oldest: "Sort: Oldest first"
   };
 
   var FORM_PAGE = "../borrow_request_form/borrow_request_form.html";
@@ -102,7 +102,7 @@
             " &middot; Return " + escapeHtml(fmtShort(req.returnBy)) + ", " +
             escapeHtml(req.returnTime || "5:00 PM") + "</p>" +
         "</div>" +
-        '<a class="mr-card__form-btn" href="' + escapeHtml(formUrl) + '">View Borrow<br>Request Form</a>' +
+        '<a class="mr-card__form-btn" href="' + escapeHtml(formUrl) + '">View request</a>' +
           (status === "pending" ? '<button class="mr-card__form-btn" type="button" data-cancel="' + escapeHtml(req.id) + '">Cancel request</button>' : "") +
           '<span class="mr-badge mr-badge--' + status + '">' + STATUS_LABELS[status] + "</span>" +
       "</li>"
