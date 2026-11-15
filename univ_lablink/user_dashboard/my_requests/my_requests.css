@@ -13,6 +13,11 @@ body {
   background: var(--mr-page-bg);
 }
 
+/* Skip link so keyboard users can bypass the shared header */
+.portal-skip { position: absolute; top: 8px; left: -9999px; z-index: 3000; padding: 10px 16px; border-radius: 6px; background: #112b55; color: #fff; font-weight: 600; text-decoration: none; font-family: "Inter", system-ui, sans-serif; }
+.portal-skip:focus { left: 16px; }
+.my-requests:focus { outline: none; }
+
 .my-requests {
   --mr-navy: #112b55;
   --mr-navy-hover: #0b1f3f;

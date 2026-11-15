@@ -229,6 +229,7 @@
   font-size: 34px;
   font-weight: 700;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
   color: var(--d-navy);
 }
 
@@ -496,6 +497,7 @@
   padding: 4px 0 0;
   text-align: center;
   vertical-align: top;
+  font-variant-numeric: tabular-nums;
 }
 
 .dash-cal-num {
@@ -671,6 +673,7 @@
   width: min(380px, calc(100vw - 32px));
   max-height: min(calc(100dvh - 136px), 460px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: #ffffff;
   border: 1px solid var(--d-line);
   border-radius: 12px;
@@ -988,6 +991,7 @@
   width: 100%;
   max-width: 1720px;
   margin-inline: auto;
+  scroll-margin-top: 140px; /* clear the sticky header when jumped to */
   padding: 46px clamp(24px, 4vw, 64px) 120px;
 }
 

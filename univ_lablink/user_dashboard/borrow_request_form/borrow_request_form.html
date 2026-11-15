@@ -10,9 +10,10 @@
   <link rel="stylesheet" href="../../portal-pages.css">
 </head>
 <body class="portal-page">
+  <a class="portal-skip" href="#portal-main">Skip to main content</a>
   <div id="lablink-header" data-active="requests"></div>
   <script src="../../header/header.js"></script>
-  <main class="portal-main">
+  <main class="portal-main" id="portal-main" tabindex="-1">
     <div class="portal-heading">
       <div>
         <p class="portal-kicker">Inventory / Borrowing Request</p>
@@ -20,7 +21,7 @@
         <p>Review the equipment and schedule before submitting your request to laboratory staff.</p>
       </div>
     </div>
-    <form id="request-form" class="request-layout">
+    <form id="request-form" class="request-layout" autocomplete="off">
       <div class="request-layout__main">
         <section class="portal-card" aria-labelledby="student-details-title">
         <h2 id="student-details-title">User Details</h2>
@@ -29,10 +30,10 @@
           <label class="portal-field"><span class="portal-label">Account name</span><input id="student-name" class="portal-input" readonly></label>
           <label class="portal-field"><span class="portal-label">User ID</span><input id="student-number" class="portal-input" readonly></label>
           <label class="portal-field"><span class="portal-label">Department</span><input id="department" class="portal-input" readonly></label>
-          <label class="portal-field portal-field--wide"><span class="portal-label">Purpose of borrowing</span><input id="purpose" class="portal-input" placeholder="For example: Chemistry research" required></label>
-          <label class="portal-field"><span class="portal-label">Borrow date</span><input id="borrow-date" class="portal-input" type="date" required></label>
-          <label class="portal-field"><span class="portal-label">Return date</span><input id="return-date" class="portal-input" type="date" required></label>
-          <label class="portal-field portal-field--wide"><span class="portal-label">Notes (optional)</span><textarea id="notes" class="portal-textarea" placeholder="Add any details the laboratory staff should know"></textarea></label>
+          <label class="portal-field portal-field--wide"><span class="portal-label">Purpose of borrowing</span><input id="purpose" name="purpose" class="portal-input" placeholder="For example: Chemistry research" required></label>
+          <label class="portal-field"><span class="portal-label">Borrow date</span><input id="borrow-date" name="borrow-date" class="portal-input" type="date" required></label>
+          <label class="portal-field"><span class="portal-label">Return date</span><input id="return-date" name="return-date" class="portal-input" type="date" required></label>
+          <label class="portal-field portal-field--wide"><span class="portal-label">Notes (optional)</span><textarea id="notes" name="notes" class="portal-textarea" placeholder="Add any details the laboratory staff should know…"></textarea></label>
         </div>
         </section>
         <section class="portal-card" aria-labelledby="selected-items-title">
@@ -62,7 +63,7 @@
           </div>
           <div class="request-inventory__search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.2 4.2"></path></svg>
-            <input id="available-search" type="search" placeholder="Search inventory..." aria-label="Search available equipment">
+            <input id="available-search" type="search" placeholder="Search inventory…" aria-label="Search available equipment">
           </div>
           <div class="request-inventory__chips" role="group" aria-label="Inventory categories"></div>
           <div class="request-inventory__list" id="available-items"></div>

@@ -32,21 +32,15 @@
   // Project root (…/univ_lablink/)
   var ROOT_DIR = new URL("../", HEADER_DIR).href;
 
-  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var clockTimer = null;
   var rootEl = null;
   var pendingCount = null;
+  var clockDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+  var clockTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
   /* ---------- Live date / time ---------- */
   function formatDateTime(date) {
-    var hours = date.getHours();
-    var suffix = hours >= 12 ? "PM" : "AM";
-    var hour12 = hours % 12 || 12;
-    var minutes = String(date.getMinutes()).padStart(2, "0");
-    return (
-      MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear() +
-      " | " + hour12 + ":" + minutes + " " + suffix
-    );
+    return clockDate.format(date) + " | " + clockTime.format(date);
   }
 
   function startClock(root) {
