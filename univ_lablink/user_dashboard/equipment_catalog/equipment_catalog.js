@@ -32,18 +32,18 @@
 
   function add(item) {
     try {
-      if (item.status !== "Available") return notify("This equipment is currently unavailable.", true);
+      if (item.status !== "Available") return notify("This item is not available to borrow.", true);
       var current = draft();
       var selection = current.filter(function (entry) { return entry.id === item.id; })[0];
       if (selection) {
-        if (selection.qty >= item.stock) return notify("You have selected all available stock.", true);
+        if (selection.qty >= item.stock) return notify("That is all the available stock.", true);
         selection.qty += 1;
       } else {
         current.push({ id: item.id, qty: 1 });
       }
       store.setDraft(current);
       render();
-      notify(item.name + " added to your request.");
+      notify("Added " + item.name + " to your request.");
     } catch (error) { notify(error.message, true); }
   }
 
@@ -76,15 +76,15 @@
         '<td><div class="catalog-item">' + image + '<span class="catalog-item-copy"><strong>' + esc(item.name) +
         "</strong>" + (item.detail ? "<small>" + esc(item.detail) + "</small>" : "") + "</span></div></td>" +
         '<td><span class="catalog-category">' + esc(item.category) + "</span></td>" +
-        '<td class="catalog-location">' + esc(item.location || "—") + "</td>" +
+        '<td class="catalog-location">' + esc(item.location || "Not listed") + "</td>" +
         '<td><span class="catalog-availability ' + (available ? "is-available" : "is-unavailable") + '">' +
-        '<span class="catalog-availability-dot" aria-hidden="true"></span>' + (available ? "Available" : "Not Available") + "</span></td>" +
+        '<span class="catalog-availability-dot" aria-hidden="true"></span>' + (available ? "Available" : "Not available") + "</span></td>" +
         '<td class="catalog-quantity">' + esc(item.totalQuantity) + "</td>" +
         '<td><button class="portal-button portal-button--small catalog-borrow" type="button" data-add="' + esc(item.id) + '" ' +
-        (available ? "" : "disabled") + ">" + (available ? (selectedQuantity ? "Add Another" : "Borrow Available") : "Borrow Unavailable") + "</button></td></tr>";
+        (available ? "" : "disabled") + ">" + (available ? (selectedQuantity ? "Add another" : "Add to request") : "Not available") + "</button></td></tr>";
     }).join("");
     if (!visible.length && !(query || category.value !== "all")) {
-      rows.innerHTML = '<tr><td class="catalog-empty-row" colspan="6">No equipment is currently listed.</td></tr>';
+      rows.innerHTML = '<tr><td class="catalog-empty-row" colspan="6">No equipment listed yet.</td></tr>';
     }
 
     function imageFor(item) {

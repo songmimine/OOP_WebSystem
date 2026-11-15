@@ -57,15 +57,15 @@
     var returnButton = event.target.closest("[data-return]");
     var extensionButton = event.target.closest("[data-extension]");
     if (returnButton) {
-      if (!window.confirm("Submit this equipment for return inspection? Staff must physically inspect and confirm it.")) return;
+      if (!window.confirm("Mark these items for return? A staff member checks them in before the loan closes.")) return;
       returnButton.disabled = true;
       store.requestReturn(returnButton.dataset.return).then(function () {
-        notify("Return submitted. The borrowing remains active until laboratory staff confirms inspection.");
+        notify("Return submitted. The loan stays open until staff confirm the items.");
       }).catch(function (error) { notify(error.message, true); returnButton.disabled = false; });
     }
     if (extensionButton) {
       selected = store.requests().find(function (request) { return request.transactionId === extensionButton.dataset.extension; });
-      if (!selected) return notify("Borrowing transaction was not found.", true);
+      if (!selected) return notify("That loan is no longer in your account.", true);
       document.getElementById("extension-date").value = "";
       document.getElementById("extension-date").min = selected.returnBy.slice(0, 10);
       document.getElementById("extension-reason").value = "";
@@ -86,7 +86,7 @@
       return store.refresh();
     }).then(function () {
       modal.hidden = true;
-      notify("Extension request sent to laboratory staff for approval.");
+      notify("Extension request sent to laboratory staff.");
     }).catch(function (error) { notify(error.message, true); }).finally(function () { button.disabled = false; });
   });
   window.addEventListener("lablink:data-changed", render);

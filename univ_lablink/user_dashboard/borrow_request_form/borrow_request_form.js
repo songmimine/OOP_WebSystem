@@ -97,7 +97,7 @@
     if (!existing) {
       document.getElementById("form-title").textContent = "Request not found";
       document.getElementById("view-request-status").hidden = true;
-      document.getElementById("view-request-meta").textContent = "This request could not be found in your account.";
+      document.getElementById("view-request-meta").textContent = "That request is not in your account. It may have been cancelled.";
       return;
     }
     document.getElementById("form-title").textContent = "Borrowing Request";

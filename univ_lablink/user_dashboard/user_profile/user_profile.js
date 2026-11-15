@@ -24,7 +24,7 @@
         email: document.getElementById("profile-email").value.trim()
       }
     }).then(function (user) {
-      status.textContent = "Profile changes saved to your account.";
+      status.textContent = "Profile saved.";
       status.hidden = false;
       window.dispatchEvent(new CustomEvent("lablink:data-changed"));
       if (window.LabLinkHeader) window.LabLinkHeader.setUser(user.name, "University User");
