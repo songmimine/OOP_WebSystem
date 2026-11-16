@@ -1091,6 +1091,142 @@ def acknowledge_notifications():
     return jsonify(ok=True)
 
 
+def _notification_moment(value):
+    """Parse a stored timestamp (date or datetime) into a datetime, or None."""
+    if not value:
+        return None
+    text = str(value).strip().replace("T", " ")
+    for pattern in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text, pattern)
+        except ValueError:
+            continue
+    return None
+
+
+def _notification_when(moment, with_time=True):
+    if not moment:
+        return ""
+    text = moment.strftime("%b %d, %Y").replace(" 0", " ", 1)
+    if with_time:
+        text += ", " + moment.strftime("%I:%M %p").lstrip("0")
+    return text
+
+
+@app.get("/api/notifications/mine")
+@require_role("user")
+def my_notifications():
+    """Read-only notification feed for the signed-in borrower."""
+
+    account = account_from_session()
+    if not account:
+        return api_error("Your account is unavailable. Please sign in again.", 401)
+
+    now = datetime.now()
+    request_url = "user_dashboard/my_requests/my_requests.html?request="
+    return_url = "user_dashboard/return_equipment/return_equipment.html?request="
+    items = []
+
+    for row in request_rows(account.account_id):
+        status = row["status"]
+        purpose = row["purpose"] or "Laboratory equipment"
+        request_link = request_url + str(row["id"])
+        return_link = return_url + str(row["id"])
+
+        if status == "pending":
+            items.append(
+                {
+                    "id": "notification-" + str(row["id"]) + "-pending",
+                    "type": "pending",
+                    "title": "Request submitted",
+                    "message": "Your request for " + purpose + " is awaiting laboratory staff approval.",
+                    "time": row["submitted"],
+                    "requestId": row["id"],
+                    "url": request_link,
+                }
+            )
+        elif status == "approved":
+            pickup = _notification_moment(row["borrow"])
+            items.append(
+                {
+                    "id": "notification-" + str(row["id"]) + "-approved",
+                    "type": "approved",
+                    "title": "Request approved",
+                    "message": (
+                        "Your request for " + purpose + " was approved."
+                        + (" Pick it up on " + _notification_when(pickup) + "." if pickup else "")
+                    ),
+                    "time": row["submitted"],
+                    "requestId": row["id"],
+                    "url": request_link,
+                }
+            )
+        elif status == "return_requested":
+            items.append(
+                {
+                    "id": "notification-" + str(row["id"]) + "-return",
+                    "type": "return",
+                    "title": "Return submitted",
+                    "message": "Your return for " + purpose + " is waiting for laboratory staff confirmation.",
+                    "time": row["returnRequestedAt"] or row["submitted"],
+                    "requestId": row["id"],
+                    "url": return_link,
+                }
+            )
+        elif status in ("active", "partially_returned", "overdue"):
+            due = _notification_moment(row["returnBy"])
+            if due and due < now:
+                items.append(
+                    {
+                        "id": "notification-" + str(row["id"]) + "-overdue",
+                        "type": "overdue",
+                        "title": "Return overdue",
+                        "message": purpose + " was due on " + _notification_when(due) + ". Please return it now.",
+                        "time": row["submitted"],
+                        "requestId": row["id"],
+                        "url": return_link,
+                    }
+                )
+            elif due:
+                items.append(
+                    {
+                        "id": "notification-" + str(row["id"]) + "-due",
+                        "type": "due",
+                        "title": "Return due soon",
+                        "message": purpose + " is due on " + _notification_when(due) + ".",
+                        "time": row["submitted"],
+                        "requestId": row["id"],
+                        "url": return_link,
+                    }
+                )
+        elif status == "returned":
+            returned = _notification_moment(row["actualReturn"]) or _notification_moment(row["submitted"])
+            items.append(
+                {
+                    "id": "notification-" + str(row["id"]) + "-returned",
+                    "type": "returned",
+                    "title": "Equipment returned",
+                    "message": "Your return for " + purpose + " was received. Thank you.",
+                    "time": row["actualReturn"] or row["submitted"],
+                    "requestId": row["id"],
+                    "url": request_link,
+                }
+            )
+
+    def sort_key(item):
+        moment = _notification_moment(item.get("time"))
+        return moment or datetime.min
+
+    items.sort(key=sort_key, reverse=True)
+    items = items[:20]
+
+    return jsonify(
+        count=len(items),
+        viewAllUrl="user_dashboard/my_requests/my_requests.html",
+        items=items,
+    )
+
+
 @app.get("/api/history")
 @require_role("laboratory_staff")
 def history():

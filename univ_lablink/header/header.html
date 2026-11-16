@@ -41,6 +41,19 @@
     </form>
 
     <div class="msh-status">
+      <button
+        class="msh-nav-toggle"
+        type="button"
+        aria-label="Open navigation"
+        aria-expanded="false"
+        aria-controls="msh-nav"
+        data-nav-toggle
+      >
+        <svg class="msh-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
+
       <div class="msh-datetime">
         <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="4" y="5" width="16" height="15" rx="2"></rect>
@@ -49,19 +62,54 @@
         <time class="msh-datetime-text" data-datetime>Loading…</time>
       </div>
 
-      <button class="msh-bell" type="button" aria-label="Notifications">
-        <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"></path>
-          <path d="M10 21a2 2 0 0 0 4 0"></path>
-        </svg>
-        <span class="msh-badge" data-notification-badge hidden>0</span>
-      </button>
+      <div class="msh-bell-wrap">
+        <button
+          class="msh-bell"
+          type="button"
+          aria-label="Notifications"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="msh-notif-panel"
+          data-notification-bell
+        >
+          <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"></path>
+            <path d="M10 21a2 2 0 0 0 4 0"></path>
+          </svg>
+          <span class="msh-badge" data-notification-badge hidden>0</span>
+        </button>
+
+        <section
+          class="msh-notif-panel"
+          id="msh-notif-panel"
+          data-notif-panel
+          role="dialog"
+          aria-labelledby="msh-notif-title"
+          tabindex="-1"
+          hidden
+        >
+          <div class="msh-notif-panel__head">
+            <strong class="msh-notif-panel__title" id="msh-notif-title">Notifications</strong>
+            <button class="msh-notif-markall" type="button" data-notif-markall>Mark all as read</button>
+            <button class="msh-notif-close" type="button" data-notif-close aria-label="Close notifications">
+              <svg class="msh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+            </button>
+          </div>
+
+          <ul class="msh-notif-list" data-notif-list role="menu" aria-label="Notifications"></ul>
+          <p class="msh-notif-empty" data-notif-empty hidden>You're all caught up.</p>
+
+          <div class="msh-notif-foot">
+            <a href="#" data-path="user_dashboard/my_requests/my_requests.html" data-notif-viewall>View all notifications</a>
+          </div>
+        </section>
+      </div>
 
       <div class="msh-profile">
         <button
           class="msh-profile-btn"
           type="button"
-          aria-haspopup="true"
+          aria-haspopup="menu"
           aria-expanded="false"
           aria-controls="msh-profile-menu"
           data-profile-toggle
@@ -105,7 +153,7 @@
                   <path d="M12 2.8v2.5M12 18.7v2.5M2.8 12h2.5M18.7 12h2.5M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"></path>
                   <circle cx="12" cy="12" r="6.6"></circle>
                 </svg>
-                <span>Account Settings</span>
+                <span>Settings</span>
               </a>
             </li>
           </ul>
@@ -126,7 +174,7 @@
   </div>
 
   <!-- B. Navigation bar -->
-  <nav class="msh-nav" aria-label="Main navigation">
+  <nav class="msh-nav" id="msh-nav" aria-label="Main navigation">
     <ul class="msh-nav-list">
       <li>
         <a class="msh-nav-link is-active" data-nav="dashboard" data-path="user_dashboard/user_dashboard.html" href="#" aria-current="page">
@@ -137,22 +185,13 @@
         </a>
       </li>
       <li>
-        <a class="msh-nav-link" data-nav="about" data-path="user_welcome/about.html" href="#">
+        <a class="msh-nav-link" data-nav="borrow" data-path="user_dashboard/borrow_request_form/borrow_request_form.html" href="#">
           <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 11v5.5"></path>
-            <circle class="msh-dot" cx="12" cy="7.8" r=".6"></circle>
+            <rect x="4" y="3.5" width="16" height="17" rx="2"></rect>
+            <path d="M8 9h8M8 13h5M8 17h3"></path>
+            <path d="M16 14v5M13.5 16.5h5"></path>
           </svg>
-          <span>About</span>
-        </a>
-      </li>
-      <li>
-        <a class="msh-nav-link" data-nav="requests" data-path="user_dashboard/my_requests/my_requests.html" href="#">
-          <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="5" y="4" width="14" height="17" rx="2"></rect>
-            <path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"></path>
-          </svg>
-          <span>My Requests</span>
+          <span>Borrowing Request Form</span>
         </a>
       </li>
       <li>
@@ -165,13 +204,32 @@
         </a>
       </li>
       <li>
-        <a class="msh-nav-link" data-nav="settings" data-path="user_dashboard/user_profile/user_profile.html" href="#">
+        <a class="msh-nav-link" data-nav="requests" data-path="user_dashboard/my_requests/my_requests.html" href="#">
           <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M12 2.8v2.5M12 18.7v2.5M2.8 12h2.5M18.7 12h2.5M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"></path>
-            <circle cx="12" cy="12" r="6.6"></circle>
+            <rect x="5" y="4" width="14" height="17" rx="2"></rect>
+            <path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"></path>
           </svg>
-          <span>Settings</span>
+          <span>My Requests</span>
+        </a>
+      </li>
+      <li>
+        <a class="msh-nav-link" data-nav="returns" data-path="user_dashboard/return_equipment/return_equipment.html" href="#">
+          <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 7v5h-5"></path>
+            <path d="M4 17v-5h5"></path>
+            <path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"></path>
+          </svg>
+          <span>Return Management</span>
+        </a>
+      </li>
+      <li>
+        <a class="msh-nav-link" data-nav="about" data-path="user_welcome/about.html" href="#">
+          <svg class="msh-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 11v5.5"></path>
+            <circle class="msh-dot" cx="12" cy="7.8" r=".6"></circle>
+          </svg>
+          <span>About</span>
         </a>
       </li>
     </ul>

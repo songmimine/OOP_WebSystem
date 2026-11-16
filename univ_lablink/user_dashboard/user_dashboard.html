@@ -18,133 +18,159 @@
   <div id="lablink-header" data-active="dashboard"></div>
   <script src="../header/header.js"></script>
 
-  <div class="dash-layout">
+  <main class="dash-main" id="dash-main" tabindex="-1">
+    <div class="dash-shell">
+      <div class="dash-board">
 
-    <!-- Sidebar -->
-    <aside class="dash-sidebar">
-      <nav aria-labelledby="dash-menu-label">
-        <p class="dash-sidebar-label" id="dash-menu-label">Dashboard sections</p>
-        <ul class="dash-side-list">
-          <li>
-            <a class="dash-side-link is-active" href="user_dashboard.html" aria-current="page">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect>
-                <rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect>
-                <rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect>
-                <rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect>
+        <!-- ============================= LEFT COLUMN ============================= -->
+        <div class="dash-col-main">
+
+          <header class="dash-greeting">
+            <h1 class="dash-title">Good day, <span id="dash-name">User</span>!</h1>
+            <p class="dash-sub">Manage your laboratory equipment and upcoming schedules.</p>
+          </header>
+
+          <!-- Next return due -->
+          <section class="dash-next" id="next-due" aria-labelledby="next-due-label">
+            <span class="dash-next__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8.5"></circle>
+                <path d="M12 7.5V12l3 2"></path>
               </svg>
-              <span>Dashboard</span>
-            </a>
-          </li>
-          <li>
-            <a class="dash-side-link" href="borrow_request_form/borrow_request_form.html">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 4v16M4 12h16"></path>
-              </svg>
-              <span>Borrowing Request Form</span>
-            </a>
-          </li>
-          <li>
-            <a class="dash-side-link" href="equipment_catalog/equipment_catalog.html">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
+            </span>
+            <div class="dash-next__body">
+              <p class="dash-next__label" id="next-due-label">NEXT RETURN DUE</p>
+              <p class="dash-next__title" id="next-due-title">Checking your schedule&hellip;</p>
+              <p class="dash-next__meta" id="next-due-meta">Loading your returns.</p>
+            </div>
+            <a class="dash-next__action" id="next-due-action" href="equipment_catalog/equipment_catalog.html">Browse equipment</a>
+          </section>
+
+          <!-- Summary cards -->
+          <section class="dash-stats-wrap" aria-label="Borrowing summary">
+            <div class="dash-stats">
+
+              <a class="dash-stat" href="my_requests/my_requests.html?filter=pending">
+                <span class="dash-stat__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8.5"></circle>
+                    <path d="M12 7.5V12l3 2"></path>
+                  </svg>
+                </span>
+                <span class="dash-stat__body">
+                  <span class="dash-stat__num" id="stat-pending">&mdash;</span>
+                  <span class="dash-stat__label">Pending Requests</span>
+                  <span class="dash-stat__hint">Awaiting approval</span>
+                </span>
+              </a>
+
+              <a class="dash-stat" href="my_requests/my_requests.html?filter=active">
+                <span class="dash-stat__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 8.2 12 4l8 4.2v7.6L12 20l-8-4.2z"></path>
+                    <path d="M4 8.2 12 12l8-3.8M12 12v8"></path>
+                  </svg>
+                </span>
+                <span class="dash-stat__body">
+                  <span class="dash-stat__num" id="stat-active">&mdash;</span>
+                  <span class="dash-stat__label">Active Borrows</span>
+                  <span class="dash-stat__hint" id="stat-active-hint">0 items in your hands</span>
+                </span>
+              </a>
+
+              <a class="dash-stat" href="my_requests/my_requests.html?filter=active">
+                <span class="dash-stat__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+                    <path d="M4 10h16M9 3v4M15 3v4"></path>
+                  </svg>
+                </span>
+                <span class="dash-stat__body">
+                  <span class="dash-stat__num" id="stat-due">&mdash;</span>
+                  <span class="dash-stat__label">Due This Week</span>
+                  <span class="dash-stat__hint" id="stat-due-hint">Nothing due</span>
+                </span>
+              </a>
+
+              <a class="dash-stat dash-stat--overdue" href="my_requests/my_requests.html?filter=overdue">
+                <span class="dash-stat__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 3.5 21 20H3z"></path>
+                    <path d="M12 9v5"></path>
+                    <circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"></circle>
+                  </svg>
+                </span>
+                <span class="dash-stat__body">
+                  <span class="dash-stat__num" id="stat-overdue">&mdash;</span>
+                  <span class="dash-stat__label">Overdue</span>
+                  <span class="dash-stat__hint" id="stat-overdue-hint">Return needed now</span>
+                </span>
+              </a>
+
+            </div>
+          </section>
+
+          <!-- Active borrow requests -->
+          <section class="dash-card dash-active" aria-labelledby="req-title">
+            <div class="dash-card-head">
+              <h2 class="dash-h2" id="req-title">Active Borrow Requests</h2>
+              <div class="dash-card-tools">
+                <a class="dash-more" id="req-more" href="my_requests/my_requests.html" hidden>View all requests</a>
+                <a class="dash-btn" href="borrow_request_form/borrow_request_form.html">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                  <span>Add Request</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="dash-req-skeleton" id="req-skeleton" aria-hidden="true">
+              <div class="dash-skel-row"></div>
+              <div class="dash-skel-row"></div>
+              <div class="dash-skel-row"></div>
+            </div>
+
+            <ul class="dash-req-list" id="req-list" aria-live="polite" aria-busy="true" hidden></ul>
+
+            <div class="dash-empty" id="req-empty" hidden>
+              <svg class="dash-empty-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="4" y="3.5" width="16" height="17" rx="2"></rect>
-                <path d="M8 9h1.5M12 9h4M8 13h1.5M12 13h4M8 17h1.5M12 17h4"></path>
+                <path d="M8 9h8M8 13h8M8 17h4"></path>
               </svg>
-              <span>Equipment Catalog</span>
-            </a>
-          </li>
-          <li>
-            <a class="dash-side-link" href="my_requests/my_requests.html">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect>
-                <path d="M3.5 10h17M8 3v4M16 3v4"></path>
-              </svg>
-              <span>My Requests</span>
-            </a>
-          </li>
-          <li>
-            <a class="dash-side-link" href="return_equipment/return_equipment.html">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"/></svg>
-              <span>Return equipment</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </aside>
+              <p class="dash-empty-title">No active requests</p>
+              <p class="dash-empty-text">Pick equipment in the catalog to start your first request.</p>
+            </div>
+          </section>
 
-    <!-- Main content -->
-    <main class="dash-main" id="dash-main" tabindex="-1">
+          <!-- Catalog banner -->
+          <a class="dash-promo" href="equipment_catalog/equipment_catalog.html">
+            <span class="dash-promo__copy">
+              <strong>Browse for more items and equipment</strong>
+              <span>Find available laboratory equipment before you submit a request.</span>
+            </span>
+            <span class="dash-promo__action">
+              <span>Go to Equipment Catalog</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15"></path><path d="m13 6 6 6-6 6"></path></svg>
+            </span>
+            <span class="dash-promo__media" aria-hidden="true">
+              <img src="../assets/lab-hero.png" alt="" loading="lazy" />
+            </span>
+          </a>
 
-      <nav class="dash-crumb" aria-label="Breadcrumb">
-        <ol>
-          <li>Dashboard</li>
-          <li aria-current="page">Overview</li>
-        </ol>
-      </nav>
+        </div>
 
-      <h1 class="dash-title">Good day, <span id="dash-name">User</span>!</h1>
-      <p class="dash-sub">Your borrow requests, due dates, and returns.</p>
+        <!-- ============================= RIGHT COLUMN ============================ -->
+        <aside class="dash-col-side" aria-label="Schedule and deadlines">
 
-      <!-- Summary cards -->
-      <section class="dash-stats-wrap" aria-label="Summary">
-        <dl class="dash-stats">
-          <div class="dash-stat">
-            <dt>Active Borrow Requests</dt>
-            <dd id="stat-active">0</dd>
-          </div>
-          <div class="dash-stat">
-            <dt>Items to Return</dt>
-            <dd id="stat-return">0</dd>
-          </div>
-          <div class="dash-stat dash-stat--upcoming">
-            <dt>Upcoming Returns</dt>
-            <dd id="stat-upcoming">0</dd>
-          </div>
-          <div class="dash-stat">
-            <dt>Overdue Returns</dt>
-            <dd id="stat-overdue">0</dd>
-          </div>
-        </dl>
-      </section>
-
-      <div class="dash-grid">
-
-        <!-- Active borrow requests -->
-        <section class="dash-card dash-requests" aria-labelledby="req-title">
-          <div class="dash-card-head">
-            <h2 class="dash-h2" id="req-title">Active Borrow Requests</h2>
-            <a class="dash-btn" href="equipment_catalog/equipment_catalog.html">
-              <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-              <span>New request</span>
-            </a>
-          </div>
-
-          <ul class="dash-req-list" id="req-list" hidden></ul>
-
-          <div class="dash-empty" id="req-empty">
-            <svg class="dash-empty-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="4" y="3.5" width="16" height="17" rx="2"></rect>
-              <path d="M8 9h8M8 13h8M8 17h4"></path>
-            </svg>
-            <p class="dash-empty-title">No requests yet</p>
-            <p class="dash-empty-text">Pick equipment in the catalog to start one.</p>
-          </div>
-
-          <a class="dash-more" id="req-more" href="my_requests/my_requests.html" hidden>View all requests</a>
-        </section>
-
-        <!-- Right column -->
-        <div class="dash-side-col">
-
+          <!-- Calendar -->
           <section class="dash-card dash-cal" aria-labelledby="cal-title">
             <div class="dash-cal-head">
               <h2 class="dash-cal-title" id="cal-title" aria-live="polite">Month Year</h2>
               <div class="dash-cal-nav">
                 <button type="button" id="cal-prev" aria-label="Previous month">
-                  <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>
                 </button>
                 <button type="button" id="cal-next" aria-label="Next month">
-                  <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
                 </button>
               </div>
             </div>
@@ -165,65 +191,35 @@
               <tbody id="cal-body"></tbody>
             </table>
 
-            <ul class="dash-legend" aria-label="Calendar legend">
-              <li><span class="dash-dot dash-dot--pickup" aria-hidden="true"></span>Pickup / Borrow</li>
-              <li><span class="dash-dot dash-dot--return" aria-hidden="true"></span>Return / Due</li>
-              <li><span class="dash-dot dash-dot--pending" aria-hidden="true"></span>Pending</li>
+            <ul class="dash-legend" id="cal-legend" aria-label="Calendar legend">
+              <li data-legend="pickup"><span class="dash-dot dash-dot--pickup" aria-hidden="true"></span>Pickup / Borrow</li>
+              <li data-legend="return"><span class="dash-dot dash-dot--return" aria-hidden="true"></span>Return / Due</li>
+              <li data-legend="pending"><span class="dash-dot dash-dot--pending" aria-hidden="true"></span>Pending</li>
             </ul>
           </section>
 
+          <!-- Return notices and deadlines -->
           <section class="dash-card dash-deadlines" aria-labelledby="dl-title">
-            <h2 class="dash-h3" id="dl-title">Upcoming Deadlines</h2>
-            <ul class="dash-dl-list" id="dl-list" hidden></ul>
-            <p class="dash-dl-empty" id="dl-empty">
-              Nothing due soon and nothing overdue.
-            </p>
+            <div class="dash-dl-head">
+              <h2 class="dash-h2" id="dl-title">Return Notices &amp; Deadlines</h2>
+            </div>
+
+            <div class="dash-dl-skeleton" id="dl-skeleton" aria-hidden="true">
+              <div class="dash-skel-notice"></div>
+              <div class="dash-skel-notice"></div>
+              <div class="dash-skel-notice"></div>
+            </div>
+
+            <ul class="dash-dl-list" id="dl-list" aria-live="polite" hidden></ul>
+            <p class="dash-dl-empty" id="dl-empty" hidden>Nothing due soon and nothing overdue.</p>
           </section>
 
-        </div>
+        </aside>
       </div>
-
-      <a class="dash-catalog-promo" href="equipment_catalog/equipment_catalog.html">
-        <span class="dash-catalog-promo__copy">
-          <strong>Need more equipment?</strong>
-          <span>Check what is in stock before you submit a request.</span>
-          <span class="dash-catalog-promo__action">Browse equipment <span aria-hidden="true">→</span></span>
-        </span>
-        <img src="../assets/lab-hero.png" alt="Laboratory workbench with microscopes and equipment" loading="lazy">
-      </a>
-    </main>
-  </div>
-
-  <!-- Notification button (bottom right) – shares its count with the header bell -->
-  <button
-    type="button"
-    class="dash-fab"
-    id="notif-fab"
-    aria-haspopup="dialog"
-    aria-expanded="false"
-    aria-controls="notif-panel"
-    aria-label="Notifications"
-  >
-    <svg class="dash-fab-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"></path>
-      <path d="M10 21a2 2 0 0 0 4 0"></path>
-    </svg>
-    <span class="dash-fab-badge" id="fab-badge" hidden>0</span>
-  </button>
-
-  <section class="dash-notif" id="notif-panel" role="dialog" aria-labelledby="notif-title" tabindex="-1" hidden>
-    <div class="dash-notif-head">
-      <h2 class="dash-notif-title" id="notif-title">Notifications</h2>
-      <button type="button" class="dash-link-btn" id="notif-markall">Mark all as read</button>
-      <button type="button" class="dash-close" id="notif-close" aria-label="Close notifications">
-        <svg class="dash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
-      </button>
     </div>
-    <ul class="dash-notif-list" id="notif-list" hidden></ul>
-    <p class="dash-notif-empty" id="notif-empty">No notifications yet.</p>
-  </section>
+  </main>
 
-  <p class="dash-sr" id="notif-live" role="status" aria-live="polite"></p>
+  <p class="dash-sr" id="dash-live" role="status" aria-live="polite"></p>
 
   <script src="../portal-store.js"></script>
   <script src="user_dashboard.js"></script>
