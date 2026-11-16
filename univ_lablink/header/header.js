@@ -647,9 +647,6 @@
   }
 
   function loadUserFooter() {
-    // The dashboard fills the 1920×1080 frame on its own; keep the footer for
-    // the other portal pages that have room for it.
-    if (document.body && document.body.classList.contains("dash-page")) return;
     if (!document.body || document.getElementById("lablink-footer-mount")) return;
 
     var footerMount = document.createElement("div");
