@@ -1,2 +1,12 @@
 .history-table { min-width: 1050px; }
+.history-filters { align-items: flex-end; }
+.history-search { position: relative; display: block; flex: 1 1 260px; }
+.history-search svg { position: absolute; top: 50%; left: 14px; width: 18px; height: 18px; transform: translateY(-50%); fill: none; stroke: #69758a; stroke-width: 1.8; pointer-events: none; }
+.history-search .portal-input { width: 100%; padding-left: 52px; }
+.history-status-field { flex: 0 1 262px; }
+.history-status-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 42px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23102b52' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 18px center; background-size: 12px 8px; }
 .history-empty { padding: 18px; color: #69758a; }
+@media (max-width: 650px) {
+  .history-filters { align-items: stretch; }
+  .history-status-field { flex-basis: auto; }
+}

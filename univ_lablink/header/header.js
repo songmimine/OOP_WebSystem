@@ -563,18 +563,125 @@
   function initSearch(root) {
     var form = root.querySelector(".msh-search");
     var input = root.querySelector(".msh-search-input");
+    var suggestionList = root.querySelector("[data-search-suggestions]");
     if (!form || !input) return;
+
+    var navigationSuggestions = [
+      { name: "Dashboard", page: "Dashboard", path: "user_dashboard/user_dashboard.html", terms: ["dashboard", "home", "overview"] },
+      { name: "Borrowing Request Form", page: "Borrowing Request Form", path: "user_dashboard/borrow_request_form/borrow_request_form.html", terms: ["borrow", "borrowing", "request", "form"] },
+      { name: "Equipment Catalog", page: "Equipment Catalog", path: "user_dashboard/equipment_catalog/equipment_catalog.html", terms: ["equipment", "catalog", "inventory", "category", "categories"] },
+      { name: "My Requests", page: "My Requests", path: "user_dashboard/my_requests/my_requests.html", terms: ["my requests", "requests", "status", "approval"] },
+      { name: "Borrowed Equipment", page: "Borrowed Equipment", path: "user_dashboard/currently_borrowing/currently_borrowing.html", terms: ["borrowed", "currently borrowing", "active borrowing"] },
+      { name: "Return Management", page: "Return Management", path: "user_dashboard/return_equipment/return_equipment.html", terms: ["return", "returns", "deadline", "due"] },
+      { name: "About", page: "About", path: "user_welcome/about.html", terms: ["about", "laboratory", "system"] }
+    ];
+    var equipmentSuggestions = [];
+    var searchDataPromise;
+
+    function escapeSearch(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, function (character) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
+      });
+    }
+
+    function highlightSearch(value, query) {
+      var text = String(value == null ? "" : value);
+      var index = text.toLowerCase().indexOf(query.toLowerCase());
+      if (index === -1) return escapeSearch(text);
+      return escapeSearch(text.slice(0, index)) + "<mark>" +
+        escapeSearch(text.slice(index, index + query.length)) + "</mark>" +
+        escapeSearch(text.slice(index + query.length));
+    }
+
+    function loadEquipmentSuggestions() {
+      if (searchDataPromise) return searchDataPromise;
+      searchDataPromise = fetch("/api/equipment").then(function (response) {
+        if (!response.ok) throw new Error("Equipment search unavailable.");
+        return response.json();
+      }).then(function (data) {
+        equipmentSuggestions = [];
+        (data.items || []).forEach(function (item) {
+          if (item.name) equipmentSuggestions.push({ name: item.name, page: "Equipment Catalog", path: "user_dashboard/equipment_catalog/equipment_catalog.html", query: item.name });
+          if (item.category) equipmentSuggestions.push({ name: item.category, page: "Equipment Catalog", path: "user_dashboard/equipment_catalog/equipment_catalog.html", query: item.category });
+        });
+        return equipmentSuggestions;
+      }).catch(function (error) {
+        console.error("[LabLink user header] Equipment search could not be loaded.", error);
+        return [];
+      });
+      return searchDataPromise;
+    }
+
+    function suggestionsFor(query) {
+      var normalized = query.toLowerCase();
+      var matches = navigationSuggestions.filter(function (item) {
+        return item.name.toLowerCase().indexOf(normalized) !== -1 ||
+          item.terms.some(function (term) { return term.indexOf(normalized) !== -1; });
+      }).concat(equipmentSuggestions.filter(function (item) {
+        return item.name.toLowerCase().indexOf(normalized) !== -1;
+      }));
+      var seen = {};
+      return matches.filter(function (item) {
+        var key = item.name.toLowerCase() + "|" + item.path;
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      }).slice(0, 12);
+    }
+
+    function renderSuggestions(query, matches) {
+      if (!query) {
+        suggestionList.hidden = true;
+        suggestionList.innerHTML = "";
+        return;
+      }
+      suggestionList.hidden = false;
+      suggestionList.innerHTML = matches.length ? matches.map(function (item, index) {
+        return '<li><button class="msh-search-suggestion" type="button" data-search-suggestion-index="' + index + '"><strong>' +
+          highlightSearch(item.name, query) + '</strong> <span>— from ' + escapeSearch(item.page) + "</span></button></li>";
+      }).join("") : '<li class="msh-search-empty">No matching user-side results found.</li>';
+    }
+
+    function navigateSearch(item, query) {
+      var targetQuery = item && item.query ? item.query : query;
+      var url = new URL(item ? item.path : "user_dashboard/equipment_catalog/equipment_catalog.html", ROOT_DIR);
+      if (targetQuery) url.searchParams.set("q", targetQuery);
+      window.location.assign(url.href);
+    }
+
+    input.addEventListener("input", function () {
+      var query = input.value.trim();
+      if (!query) return renderSuggestions("", []);
+      renderSuggestions(query, suggestionsFor(query));
+      loadEquipmentSuggestions().then(function () {
+        if (input.value.trim() === query) renderSuggestions(query, suggestionsFor(query));
+      });
+    });
+
+    suggestionList.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-search-suggestion-index]");
+      if (!button) return;
+      var matches = suggestionsFor(input.value.trim());
+      var selected = matches[Number(button.dataset.searchSuggestionIndex)];
+      if (selected) navigateSearch(selected, input.value.trim());
+    });
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-      var detail = { query: input.value.trim() };
-      document.dispatchEvent(new CustomEvent("header:search", { detail: detail }));
-      if (!document.querySelector(".my-requests") &&
-          !document.querySelector("#catalog-grid") &&
-          detail.query) {
-        window.location.href = new URL(
-          "user_dashboard/equipment_catalog/equipment_catalog.html?q=" + encodeURIComponent(detail.query),
-          ROOT_DIR
-        ).href;
+      var query = input.value.trim();
+      if (!query) return;
+      var matches = suggestionsFor(query);
+      navigateSearch(matches[0], query);
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!form.contains(event.target)) suggestionList.hidden = true;
+    });
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        suggestionList.hidden = true;
+        input.blur();
       }
     });
   }
@@ -615,7 +722,6 @@
   function init(root, activeKey) {
     rootEl = root;
     resolvePaths(root);
-    startClock(root);
     initProfileMenu(root);
     initSearch(root);
     initNotifications(root);

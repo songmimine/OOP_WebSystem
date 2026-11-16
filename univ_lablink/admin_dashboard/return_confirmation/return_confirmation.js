@@ -2,6 +2,7 @@
   "use strict";
   var admin = window.LabLinkAdmin;
   var transactions = [];
+  var caseTransactionIds = {};
   var search = "";
   var selectedTransaction = null;
   var filter = document.getElementById("return-filter");
@@ -17,6 +18,7 @@
       if (!isOpen(row)) return false;
       if (filter.value === "return_requested" && row.status !== "return_requested") return false;
       if (filter.value === "overdue" && row.status !== "overdue") return false;
+      if (filter.value === "with_cases" && !caseTransactionIds[row.transactionId]) return false;
       var text = [row.transactionId, row.id, row.studentName, row.studentNumber, row.purpose, admin.itemSummary(row.items)].join(" ").toLowerCase();
       return !search || text.indexOf(search.toLowerCase()) !== -1;
     });
@@ -38,7 +40,11 @@
   }
 
   function load() {
-    admin.api("/api/transactions").then(function (data) { transactions = data.items || []; render(); }).catch(function (error) { admin.toast(error.message, true); });
+    Promise.all([admin.api("/api/transactions"), admin.api("/api/staff/cases")]).then(function (results) {
+      transactions = results[0].items || [];
+      (results[1].cases || []).forEach(function (item) { caseTransactionIds[item.transactionId] = true; });
+      render();
+    }).catch(function (error) { admin.toast(error.message, true); });
   }
 
   function openInspection(row) {
