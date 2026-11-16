@@ -12,8 +12,8 @@
   <main class="admin-content">
     <div class="portal-heading"><div><p class="portal-kicker">Transactions / History</p><h1>Records History</h1><p>Completed and partially completed borrowing transactions, linked to the account that made each request.</p></div></div>
     <section class="portal-card">
-      <div class="portal-toolbar"><input class="portal-input" id="history-search" type="search" aria-label="Search transaction history" placeholder="Search transaction, user ID, name, or equipment">
-        <label class="portal-field"><span class="portal-label">Transaction status</span><select class="portal-select" id="history-status"><option value="">All statuses</option><option value="returned">Returned</option><option value="partially_returned">Partially returned</option><option value="damaged">Damaged</option><option value="lost">Lost</option></select></label>
+      <div class="portal-toolbar history-filters"><label class="history-search"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input class="portal-input" id="history-search" type="text" aria-label="Search transaction history" placeholder="Search transaction, user ID, name, or equipment"></label>
+        <label class="portal-field history-status-field"><span class="portal-label">Transaction status</span><select class="portal-select history-status-select" id="history-status"><option value="">All statuses</option><option value="returned">Returned</option><option value="partially_returned">Partially returned</option><option value="damaged">Damaged</option><option value="lost">Lost</option></select></label>
       </div>
       <div class="portal-table-wrap"><table class="portal-table history-table"><thead><tr><th>Transaction ID</th><th>User ID</th><th>User name</th><th>Equipment / quantities</th><th>Borrowed</th><th>Due</th><th>Actual return</th><th>Status</th></tr></thead><tbody id="history-rows"><tr><td colspan="8">Loading records…</td></tr></tbody></table></div>
     </section>

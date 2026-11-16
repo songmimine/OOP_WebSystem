@@ -6,6 +6,7 @@
   var category = document.getElementById("equipment-category-filter");
   var rows = [];
   var query = "";
+  var categoryOptions = ["Equipment & Machines", "Glassware & Containers", "Chemicals & Reagents"];
 
   function imagePath(item) {
     if (!item.image) return '<span class="equipment-image-empty">No image</span>';
@@ -13,12 +14,11 @@
   }
 
   function render() {
-    var categories = Array.from(new Set(rows.map(function (item) { return item.category; }))).sort();
     var current = category.value;
-    category.innerHTML = '<option value="">All categories</option>' + categories.map(function (name) {
+    category.innerHTML = '<option value="">All categories</option>' + categoryOptions.map(function (name) {
       return '<option value="' + admin.escape(name) + '">' + admin.escape(name) + "</option>";
     }).join("");
-    category.value = categories.indexOf(current) !== -1 ? current : "";
+    category.value = categoryOptions.indexOf(current) !== -1 ? current : "";
     var visible = rows.filter(function (item) {
       var text = [item.id, item.name, item.detail, item.unit, item.category, item.location].join(" ").toLowerCase();
       return (!query || text.indexOf(query.toLowerCase()) !== -1) && (!category.value || item.category === category.value);
